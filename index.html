@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選手記録管理</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <h1>選手記録管理</h1>
+
+    <!-- 選手登録フォーム -->
+    <section id="register-athlete">
+        <h2>選手登録</h2>
+        <form id="register-athlete-form">
+            <label for="new-athlete-name">選手名を入力:</label>
+            <input type="text" id="new-athlete-name" placeholder="選手名" required>
+            <button type="submit">登録</button>
+        </form>
+    </section>
+
+    <!-- 登録選手の選択フォーム -->
+    <section id="select-athlete">
+        <h2>記録を計測する選手を選択</h2>
+        <select id="athlete-select" multiple></select>
+        <button id="add-selected-athletes">選手追加</button>
+    </section>
+
+    <!-- 記録入力フォーム -->
+    <section id="record-input">
+        <h2>記録入力</h2>
+        <table id="record-table">
+            <thead>
+                <tr>
+                    <th>選手名</th>
+                    <th>距離 (m)</th>
+                    <th>タイム (秒)</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="record-table-body"></tbody>
+        </table>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
