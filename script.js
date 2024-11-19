@@ -1,5 +1,20 @@
 const STORAGE_KEY = 'athlete_data';
 
+// 事前登録選手リスト
+const defaultAthletes = [
+    "相方紫帆", 
+    "岩見琉音", 
+    "前田莉佐", 
+    "湯本真未", 
+    "崎本七海", 
+    "佐藤安里紗", 
+    "永瀬裕大", 
+    "和田卓英", 
+    "北川大喜", 
+    "木下裕翔", 
+    "中村香葉"
+];
+
 // 選手データを取得する関数
 function getAthleteData() {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -84,29 +99,18 @@ document.getElementById('record-table-body').addEventListener('click', function 
     }
 });
 
-// 過去の記録を表示する関数
-function showPastRecords() {
-    const athleteData = getAthleteData();
-    const tableBody = document.getElementById('past-records-body');
-    tableBody.innerHTML = ''; // 既存の内容をクリア
-
-    for (const athlete in athleteData) {
-        athleteData[athlete].forEach(record => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${athlete}</td>
-                <td>${record.distance}</td>
-                <td>${record.time}</td>
-                <td>${new Date(record.date).toLocaleDateString()}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-    }
-}
-
-// ページ読み込み時に選手リストを更新し、過去の記録を表示
+// ページ読み込み時に選手リストを更新
 window.onload = function() {
+    const athleteData = getAthleteData();
+    
+    // 事前登録選手をlocalStorageに追加
+    defaultAthletes.forEach((athleteName) => {
+        if (!athleteData[athleteName]) {
+            athleteData[athleteName] = [];
+        }
+    });
+
+    saveAthleteData(athleteData);
     populateAthleteSelect();
-    showPastRecords();  // 過去の記録を表示
 };
 
