@@ -57,11 +57,11 @@ function displayTodayRecords() {
     const today = new Date().toISOString().split('T')[0];  // 今日の日付 (YYYY-MM-DD)
 
     const todayRecords = [];
-    
+
     // すべての選手の記録をチェックして、今日の記録を抽出
     for (const athleteName in athleteData) {
         const records = athleteData[athleteName];
-        
+
         // 今日の記録をフィルタリング
         const todayRecord = records.filter(record => {
             return record.date && record.date.startsWith(today);
@@ -108,8 +108,9 @@ document.getElementById('save-record').addEventListener('click', () => {
     const time1 = parseFloat(document.getElementById('time1-input').value);
     const time2 = parseFloat(document.getElementById('time2-input').value);
     const time3 = parseFloat(document.getElementById('time3-input').value);
+    const athleteName = document.getElementById('athlete-select').value; // 選択した選手名
 
-    if (!distance || !time1 || !time2 || !time3) {
+    if (!distance || !time1 || !time2 || !time3 || !athleteName) {
         alert('すべてのフィールドを入力してください。');
         return;
     }
