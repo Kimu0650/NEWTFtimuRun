@@ -1,13 +1,16 @@
 const STORAGE_KEY = 'athlete_data';
 
+// 選手データを取得する関数
 function getAthleteData() {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 }
 
+// 選手データを保存する関数
 function saveAthleteData(data) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
+// 選手登録フォームの処理
 document.getElementById('register-athlete-form').addEventListener('submit', function (e) {
     e.preventDefault();
     const newAthleteName = document.getElementById('new-athlete-name').value.trim();
@@ -24,6 +27,7 @@ document.getElementById('register-athlete-form').addEventListener('submit', func
     }
 });
 
+// 選手セレクトボックスを更新する関数
 function populateAthleteSelect() {
     const athleteData = getAthleteData();
     const athleteSelect = document.getElementById('athlete-select');
@@ -37,6 +41,7 @@ function populateAthleteSelect() {
     }
 }
 
+// 選手追加ボタンの処理
 document.getElementById('add-selected-athletes').addEventListener('click', function () {
     const selectedAthletes = Array.from(document.getElementById('athlete-select').selectedOptions);
     const tableBody = document.getElementById('record-table-body');
@@ -56,6 +61,7 @@ document.getElementById('add-selected-athletes').addEventListener('click', funct
     });
 });
 
+// 記録保存ボタンの処理
 document.getElementById('record-table-body').addEventListener('click', function (e) {
     if (e.target.classList.contains('save-record')) {
         const row = e.target.closest('tr');

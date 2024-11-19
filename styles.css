@@ -1,3 +1,106 @@
+/* 選手登録フォームのスタイル */
+#register-athlete {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+#register-athlete h2 {
+    margin-bottom: 15px;
+}
+
+/* 選手選択フォームのスタイル */
+#select-athlete {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+#select-athlete h2 {
+    margin-bottom: 15px;
+}
+
+/* 記録入力フォームのスタイル */
+#record-input {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#record-input h2 {
+    margin-bottom: 15px;
+}
+
+/* テーブルのスタイル */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+td input {
+    width: 90%;
+    padding: 5px;
+    margin: 5px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* 記録保存ボタン */
+.save-record {
+    padding: 6px 12px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.save-record:hover {
+    background-color: #0056b3;
+}
+
+/* 複数選手を選ぶフォームのスタイル */
+select[multiple] {
+    height: 150px;
+}
+
+/* 選手名が長い場合でもきれいに表示するためのスタイル */
+td {
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ボタンの基本スタイル */
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* ページ全体の背景色 */
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
@@ -6,41 +109,5 @@ body {
 
 h1, h2 {
     color: #333;
-}
-
-form, table {
-    margin-bottom: 20px;
-}
-
-input[type="text"], input[type="number"], select {
-    padding: 8px;
-    margin: 5px;
-    width: 100%;
-}
-
-button {
-    padding: 8px 16px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 10px;
-    text-align: center;
 }
 
