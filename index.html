@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>選手記録管理</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
     <script src="app.js" defer></script>
 </head>
 <body>
@@ -31,33 +30,24 @@
     <!-- 記録入力フォーム -->
     <section id="record-input">
         <h2>記録入力</h2>
-        <table id="record-table">
-            <thead>
-                <tr>
-                    <th>選手名</th>
-                    <th>距離 (m)</th>
-                    <th>タイム (秒)</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="record-table-body"></tbody>
-        </table>
+        <form id="record-form">
+            <label for="distance-input">距離 (m):</label>
+            <input type="number" id="distance-input" required>
+
+            <div id="time-inputs">
+                <label for="time1-input">タイム 1 (秒):</label>
+                <input type="number" class="time-input" step="0.01" required>
+            </div>
+
+            <button type="button" id="add-time-input">タイムを追加</button>
+            <button type="button" id="save-record">記録を保存</button>
+        </form>
     </section>
 
-    <!-- 過去の記録表示 -->
-    <section id="view-records">
-        <h2>過去の記録</h2>
-        <table id="past-records-table">
-            <thead>
-                <tr>
-                    <th>選手名</th>
-                    <th>距離 (m)</th>
-                    <th>タイム (秒)</th>
-                    <th>日付</th>
-                </tr>
-            </thead>
-            <tbody id="past-records-body"></tbody>
-        </table>
+    <!-- 選手ページリンク -->
+    <section id="athlete-links">
+        <h2>選手別ページリンク</h2>
+        <ul id="athlete-links-list"></ul>
     </section>
 
     <script src="script.js"></script>

@@ -30,13 +30,6 @@ function addDefaultAthletes() {
     saveAthleteData(athleteData);
 }
 
-// ページが読み込まれたときに事前登録選手を追加
-window.onload = function() {
-    addDefaultAthletes();  // 事前登録選手を追加
-    populateAthleteSelect();  // 選手選択ボックスを更新
-    displayTodayRecords();  // 今日の記録を表示
-};
-
 // 選手選択フォームの更新
 function populateAthleteSelect() {
     const athleteData = getAthleteData();
@@ -49,71 +42,43 @@ function populateAthleteSelect() {
         option.textContent = name;
         athleteSelect.appendChild(option);
     }
+
+    // 選手記録ページリンクを生成
+    const athleteLinksList = document.getElementById('athlete-links-list');
+    athleteLinksList.innerHTML = '';
+    for (const name in athleteData) {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<a href="athletePage.html?name=${name}">${name}の記録</a>`;
+        athleteLinksList.appendChild(listItem);
+    }
 }
 
-// 今日の記録を表示する関数
-function displayTodayRecords() {
-    const athleteData = getAthleteData();
-    const today = new Date().toISOString().split('T')[0];  // 今日の日付 (YYYY-MM-DD)
-
-    const todayRecords = [];
-
-    // すべての選手の記録をチェックして、今日の記録を抽出
-    for (const athleteName in athleteData) {
-        const records = athleteData[athleteName];
-
-        // 今日の記録をフィルタリング
-        const todayRecord = records.filter(record => {
-            return record.date && record.date.startsWith(today);
-        });
-
-        // 今日の記録があれば、リストに追加
-        if (todayRecord.length > 0) {
-            todayRecords.push({
-                athleteName,
-                records: todayRecord
-            });
-        }
-    }
-
-    const tbody = document.getElementById('today-records-body');
-    tbody.innerHTML = '';  // 既存の内容をクリア
-
-    todayRecords.forEach(record => {
-        const row = document.createElement('tr');
-        record.records.forEach(r => {
-            row.innerHTML += `
-                <td>${record.athleteName}</td>
-                <td>${r.distance}</td>
-                <td>${r.times[0]}</td>
-                <td>${r.times[1]}</td>
-                <td>${r.times[2]}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    });
-}
-
-// 選手名が選択されたときに専用ページに飛ぶ
-document.getElementById('athlete-select').addEventListener('change', function() {
-    const selectedAthlete = this.value;
-    if (selectedAthlete) {
-        window.location.href = `athletePage.html?name=${selectedAthlete}`;
-    }
-});
+// ページが読み込まれたときに事前登録選手を追加
+window.onload = function() {
+    addDefaultAthletes();  // 事前登録選手を追加
+    populateAthleteSelect();  // 選手選択ボックスを更新
+};
 
 // 記録を保存する処理
 document.getElementById('save-record').addEventListener('click', () => {
     const distance = document.getElementById('distance-input').value;
-    const time1 = parseFloat(document.getElementById('time1-input').value);
-    const time2 = parseFloat(document.getElementById('time2-input').value);
-    const time3 = parseFloat(document.getElementById('time3-input').value);
-    const athleteName = document.getElementById('athlete-select').value; // 選択した選手名
+    const timeInputs = document.querySelectorAll('.time-input');
+    const athleteName = document.getElementById('athlete-select').value;
 
-    if (!distance || !time1 || !time2 || !time3 || !athleteName) {
+    if (!distance || !athleteName || timeInputs.length === 0) {
         alert('すべてのフィールドを入力してください。');
         return;
     }
+
+    const times = [];
+    timeInputs.forEach(input => {
+        const time = parseFloat(input.value);
+        if (isNaN(time)) {
+            alert('タイムに正しい値を入力してください。');
+            return;
+        }
+        times.push(time);
+    });
 
     const athleteData = getAthleteData();
     const date = new Date().toISOString().split('T')[0];  // 今日の日付
@@ -124,12 +89,22 @@ document.getElementById('save-record').addEventListener('click', () => {
 
     athleteData[athleteName].push({
         distance: distance,
-        times: [time1, time2, time3],
-        date: date  // 記録に日付を追加
+        times: times,
+        date: date
     });
 
     saveAthleteData(athleteData);
     alert('記録が保存されました。');
-    displayTodayRecords(); // 今日の記録を再表示
+});
+
+// タイム入力欄を動的に追加する処理
+document.getElementById('add-time-input').addEventListener('click', () => {
+    const timeInputsDiv = document.getElementById('time-inputs');
+    const newTimeInput = document.createElement('div');
+    newTimeInput.innerHTML = `
+        <label for="time-input">タイム (秒):</label>
+        <input type="number" class="time-input" step="0.01" required>
+    `;
+    timeInputsDiv.appendChild(newTimeInput);
 });
 

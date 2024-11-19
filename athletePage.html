@@ -3,48 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選手専用ページ</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>選手記録</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.jsの読み込み -->
+    <script src="athletePage.js" defer></script>
 </head>
 <body>
-    <h1 id="athlete-name"></h1>
-    <button id="back-button">戻る</button>
+    <h1 id="athlete-name">選手記録</h1>
 
-    <div>
-        <h2>過去の記録</h2>
-        <table id="record-table">
+    <!-- 記録のグラフ表示 -->
+    <section id="record-chart">
+        <h2>記録グラフ</h2>
+        <canvas id="athlete-record-chart"></canvas> <!-- グラフを表示するキャンバス -->
+    </section>
+
+    <section id="record-table">
+        <h2>記録</h2>
+        <table>
             <thead>
                 <tr>
-                    <th>距離</th>
-                    <th>1本目</th>
-                    <th>2本目</th>
-                    <th>3本目</th>
+                    <th>距離 (m)</th>
+                    <th>タイム (秒)</th>
+                    <th>日付</th>
                 </tr>
             </thead>
             <tbody id="record-table-body"></tbody>
         </table>
-    </div>
-
-    <div>
-        <h2>記録のグラフ</h2>
-        <canvas id="record-chart"></canvas>
-    </div>
-
-    <div>
-        <h3>新しい記録を入力</h3>
-        <label for="distance-input">距離（m）:</label>
-        <input type="number" id="distance-input" step="10" min="10">
-        <label for="time1-input">1本目:</label>
-        <input type="number" id="time1-input" step="0.1">
-        <label for="time2-input">2本目:</label>
-        <input type="number" id="time2-input" step="0.1">
-        <label for="time3-input">3本目:</label>
-        <input type="number" id="time3-input" step="0.1">
-        <button id="save-record">記録を保存</button>
-    </div>
-
-    <script src="athletePage.js"></script>
+    </section>
 </body>
 </html>
 
