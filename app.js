@@ -1,133 +1,112 @@
-// Service Worker の登録
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/service-worker.js').then(function (registration) {
-            console.log('Service Worker 登録成功:', registration);
-        }).catch(function (error) {
-            console.log('Service Worker 登録失敗:', error);
-        });
-    });
+const STORAGE_KEY = 'athlete_data';
+
+// 事前に登録する選手名
+const initialAthletes = [
+    "相方紫帆", "岩見琉音", "前田莉佐", "湯本真未", 
+    "崎本七海", "佐藤安里紗", "永瀬裕大", "和田卓英", 
+    "北川大喜", "木下裕翔", "中村香葉"
+];
+
+// 選手データを取得
+function getAthleteData() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 }
 
-// ローカルストレージから選手データと記録データを取得
-let athletes = JSON.parse(localStorage.getItem('athletes')) || [];
-let records = JSON.parse(localStorage.getItem('records')) || [];
+// 選手データを保存
+function saveAthleteData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
-// 選手名登録フォームの処理
-const registerForm = document.getElementById('register-athlete-form');
-registerForm.addEventListener('submit', function (event) {
-    event.preventDefault();
+// 事前に選手を登録
+function registerInitialAthletes() {
+    const athleteData = getAthleteData();
     
-    const athleteName = document.getElementById('new-athlete-name').value.trim();
-    if (athleteName && !athletes.includes(athleteName)) {
-        athletes.push(athleteName);
-        localStorage.setItem('athletes', JSON.stringify(athletes));
-        updateAthleteSelect();
-    }
-    document.getElementById('new-athlete-name').value = '';
-});
-
-// 選手選択フォームの処理
-const athleteSelect = document.getElementById('athlete-select');
-const addSelectedAthletesButton = document.getElementById('add-selected-athletes');
-addSelectedAthletesButton.addEventListener('click', function () {
-    const selectedOptions = athleteSelect.selectedOptions;
-    selectedOptions.forEach(option => {
-        const athleteName = option.value;
-        if (!records.find(record => record.name === athleteName)) {
-            records.push({
-                name: athleteName,
-                distance: '',
-                times: []
-            });
+    initialAthletes.forEach((name) => {
+        if (!athleteData[name]) {
+            athleteData[name] = [];
         }
     });
-    localStorage.setItem('records', JSON.stringify(records));
-    updateRecordTable();
-});
-
-// 記録入力フォームの処理
-const recordSubmitButton = document.getElementById('record-submit');
-recordSubmitButton.addEventListener('click', function () {
-    const distance = document.getElementById('distance').value;
-    const runs = document.getElementById('runs').value;
-
-    if (!distance || !runs) {
-        alert('距離と本数を入力してください');
-        return;
-    }
-
-    // 記録の入力
-    records.forEach(record => {
-        if (record.distance === '') {
-            record.distance = distance;
-        }
-
-        // 本数分のタイムを空で初期化
-        while (record.times.length < runs) {
-            record.times.push('');
-        }
-    });
-
-    localStorage.setItem('records', JSON.stringify(records));
-    updateRecordTable();
-});
-
-// 記録テーブルを更新
-function updateRecordTable() {
-    const recordTableBody = document.getElementById('record-table-body');
-    recordTableBody.innerHTML = '';
-
-    records.forEach(record => {
-        const row = document.createElement('tr');
-        const timesHtml = record.times.map((time, index) => `<td><input type="number" value="${time}" class="time-input" data-athlete="${record.name}" data-index="${index}"></td>`).join('');
-        row.innerHTML = `
-            <td>${record.name}</td>
-            <td>${record.distance}</td>
-            ${timesHtml}
-            <td><button class="remove-record" data-athlete="${record.name}">削除</button></td>
-        `;
-        recordTableBody.appendChild(row);
-    });
-
-    // 時間入力の変更イベント
-    const timeInputs = document.querySelectorAll('.time-input');
-    timeInputs.forEach(input => {
-        input.addEventListener('input', function () {
-            const athleteName = input.dataset.athlete;
-            const index = input.dataset.index;
-            const value = input.value;
-            const athleteRecord = records.find(record => record.name === athleteName);
-            athleteRecord.times[index] = value;
-            localStorage.setItem('records', JSON.stringify(records));
-        });
-    });
-
-    // 削除ボタンのイベント
-    const removeButtons = document.querySelectorAll('.remove-record');
-    removeButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const athleteName = button.dataset.athlete;
-            records = records.filter(record => record.name !== athleteName);
-            localStorage.setItem('records', JSON.stringify(records));
-            updateRecordTable();
-        });
-    });
+    
+    saveAthleteData(athleteData);
 }
 
-// 選手セレクトボックスを更新
-function updateAthleteSelect() {
+// 選手を登録するイベント
+document.getElementById('register-athlete-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const newAthleteName = document.getElementById('new-athlete-name').value.trim();
+    const athleteData = getAthleteData();
+
+    if (newAthleteName && !athleteData[newAthleteName]) {
+        athleteData[newAthleteName] = [];
+        saveAthleteData(athleteData);
+        alert(`選手 "${newAthleteName}" を登録しました！`);
+        document.getElementById('new-athlete-name').value = '';
+        populateAthleteSelect();
+    } else {
+        alert('この選手はすでに登録されています！');
+    }
+});
+
+// 選手名を選択肢として表示
+function populateAthleteSelect() {
+    const athleteData = getAthleteData();
     const athleteSelect = document.getElementById('athlete-select');
     athleteSelect.innerHTML = '';
-    athletes.forEach(athlete => {
+
+    for (const name in athleteData) {
         const option = document.createElement('option');
-        option.value = athlete;
-        option.textContent = athlete;
+        option.value = name;
+        option.textContent = name;
         athleteSelect.appendChild(option);
-    });
+    }
 }
 
-// 初期データの表示
-updateAthleteSelect();
-updateRecordTable();
+// 選手を記録表に追加する
+document.getElementById('add-selected-athletes').addEventListener('click', function () {
+    const selectedAthletes = Array.from(document.getElementById('athlete-select').selectedOptions);
+    const tableBody = document.getElementById('record-table-body');
+
+    selectedAthletes.forEach((athlete) => {
+        if (!document.querySelector(`tr[data-athlete="${athlete.value}"]`)) {
+            const row = document.createElement('tr');
+            row.setAttribute('data-athlete', athlete.value);
+            row.innerHTML = `
+                <td>${athlete.value}</td>
+                <td><input type="number" step="0.1" class="distance-input"></td>
+                <td><input type="number" step="0.01" class="time-input"></td>
+                <td><button class="save-record">記録を保存</button></td>
+            `;
+            tableBody.appendChild(row);
+        }
+    });
+});
+
+// 記録を保存する
+document.getElementById('record-table-body').addEventListener('click', function (e) {
+    if (e.target.classList.contains('save-record')) {
+        const row = e.target.closest('tr');
+        const athleteName = row.getAttribute('data-athlete');
+        const distance = parseFloat(row.querySelector('.distance-input').value);
+        const time = parseFloat(row.querySelector('.time-input').value);
+
+        if (!distance || !time) {
+            alert('距離とタイムを正しく入力してください。');
+            return;
+        }
+
+        const athleteData = getAthleteData();
+        athleteData[athleteName].push({ distance, time, date: new Date().toISOString() });
+        saveAthleteData(athleteData);
+
+        alert(`記録を保存しました！\n選手: ${athleteName}\n距離: ${distance}m\nタイム: ${time}秒`);
+        row.querySelector('.distance-input').value = '';
+        row.querySelector('.time-input').value = '';
+    }
+});
+
+// ページ読み込み時に事前選手を登録し、選手リストを更新
+document.addEventListener('DOMContentLoaded', function () {
+    registerInitialAthletes(); // ページが読み込まれた時に事前選手を登録
+    populateAthleteSelect(); // 選手リストの更新
+});
 

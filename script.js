@@ -84,6 +84,29 @@ document.getElementById('record-table-body').addEventListener('click', function 
     }
 });
 
-// ページ読み込み時に選手リストを更新
-window.onload = populateAthleteSelect;
+// 過去の記録を表示する関数
+function showPastRecords() {
+    const athleteData = getAthleteData();
+    const tableBody = document.getElementById('past-records-body');
+    tableBody.innerHTML = ''; // 既存の内容をクリア
+
+    for (const athlete in athleteData) {
+        athleteData[athlete].forEach(record => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${athlete}</td>
+                <td>${record.distance}</td>
+                <td>${record.time}</td>
+                <td>${new Date(record.date).toLocaleDateString()}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+}
+
+// ページ読み込み時に選手リストを更新し、過去の記録を表示
+window.onload = function() {
+    populateAthleteSelect();
+    showPastRecords();  // 過去の記録を表示
+};
 
