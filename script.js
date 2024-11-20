@@ -95,6 +95,7 @@ document.getElementById('save-record').addEventListener('click', () => {
 
     saveAthleteData(athleteData);
     alert('記録が保存されました。');
+    displayRecords(athleteName); // 記録一覧を更新
 });
 
 // タイム入力欄を動的に追加する処理
@@ -106,5 +107,47 @@ document.getElementById('add-time-input').addEventListener('click', () => {
         <input type="number" class="time-input" step="0.01" required>
     `;
     timeInputsDiv.appendChild(newTimeInput);
+});
+
+// 記録一覧を表示する処理
+function displayRecords(athleteName) {
+    const athleteData = getAthleteData();
+    const recordList = document.getElementById('record-list');
+    recordList.innerHTML = '';
+
+    if (!athleteData[athleteName] || athleteData[athleteName].length === 0) {
+        recordList.innerHTML = '<p>記録がありません。</p>';
+        return;
+    }
+
+    athleteData[athleteName].forEach((record, index) => {
+        const recordItem = document.createElement('div');
+        recordItem.className = 'record-item';
+        recordItem.innerHTML = `
+            <p>
+                距離: ${record.distance}m, タイム: ${record.times.join(', ')}秒, 日付: ${record.date}
+                <button class="delete-record" data-athlete="${athleteName}" data-index="${index}">削除</button>
+            </p>
+        `;
+        recordList.appendChild(recordItem);
+    });
+}
+
+// 記録削除処理
+document.getElementById('record-list').addEventListener('click', (e) => {
+    if (e.target.classList.contains('delete-record')) {
+        const athleteName = e.target.getAttribute('data-athlete');
+        const recordIndex = parseInt(e.target.getAttribute('data-index'), 10);
+
+        const athleteData = getAthleteData();
+        if (!athleteData[athleteName]) return;
+
+        if (confirm('この記録を削除しますか？')) {
+            athleteData[athleteName].splice(recordIndex, 1); // 該当記録を削除
+            saveAthleteData(athleteData); // データを保存
+            alert('記録が削除されました。');
+            displayRecords(athleteName); // 記録一覧を更新
+        }
+    }
 });
 

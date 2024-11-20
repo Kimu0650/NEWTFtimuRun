@@ -62,4 +62,17 @@ a {
 a:hover {
     text-decoration: underline;
 }
+button.delete-record {
+    background-color: #FF6347; /* トマト色 */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px; /* 他の要素との間隔を調整 */
+}
 
+button.delete-record:hover {
+    background-color: #FF4500; /* 濃い赤色 */
+}
