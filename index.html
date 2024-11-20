@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選手記録管理</title>
+    <title>記録管理システム</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="app.js" defer></script>
 </head>
 <body>
-    <h1>選手記録管理</h1>
+    <header>
+        <h1>記録管理システム</h1>
+    </header>
 
     <!-- 選手登録フォーム -->
     <section id="register-athlete">
@@ -28,18 +29,47 @@
     </section>
 
     <!-- 記録入力フォーム -->
-    <section id="record-input">
-        <h2>記録入力</h2>
+    <section>
+        <h2>記録を入力</h2>
         <form id="record-form">
-            <label for="distance-input">距離 (m):</label>
-            <input type="number" id="distance-input" required>
+            <label for="athlete-select">選手選択:</label>
+            <select id="athlete-select" required></select>
 
-            <div id="time-inputs">
-                <label for="time1-input">タイム 1 (秒):</label>
-                <input type="number" class="time-input" step="0.01" required>
+            <label for="event-select">種目選択:</label>
+            <select id="event-select" required>
+                <option value="short-run">走る</option>
+                <option value="load-run">負荷走</option>
+                <option value="acceleration-run">加速走</option>
+                <option value="hurdles">ハードル</option>
+                <option value="long-jump">走幅跳</option>
+                <option value="high-jump">走高跳</option>
+                <option value="triple-jump">三段跳</option>
+                <option value="javelin">槍投げ</option>
+                <option value="discus">円盤投</option>
+            </select>
+
+            <div id="distance-container" style="display: none;">
+                <label for="distance-select">距離:</label>
+                <select id="distance-select">
+                    <option value="30">30m</option>
+                    <option value="50">50m</option>
+                    <option value="70">70m</option>
+                    <option value="100">100m</option>
+                    <option value="120">120m</option>
+                    <option value="150">150m</option>
+                    <option value="200">200m</option>
+                    <option value="250">250m</option>
+                    <option value="300">300m</option>
+                    <option value="400">400m</option>
+                    <option value="manual">手動</option>
+                </select>
             </div>
 
-            <button type="button" id="add-time-input">タイムを追加</button>
+            <div id="record-container" style="display: none;">
+                <label for="record-input">記録:</label>
+                <input type="text" id="record-input" placeholder="例: 5.67 (m)">
+            </div>
+
             <button type="button" id="save-record">記録を保存</button>
         </form>
     </section>
@@ -48,6 +78,12 @@
     <section id="athlete-links">
         <h2>選手別ページリンク</h2>
         <ul id="athlete-links-list"></ul>
+    </section>
+
+    <!-- 今日の記録 -->
+    <section>
+        <h2>今日の記録</h2>
+        <ul id="today-records-list"></ul>
     </section>
 
     <script src="script.js"></script>

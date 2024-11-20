@@ -81,5 +81,16 @@ window.onload = function() {
             }
         }
     });
+
+    // 新しいコード: 選手の記録リストを追加
+    const recordsList = document.getElementById('records-list');
+    athleteData[athleteName].forEach(record => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${record.date}: 種目 - ${record.event}, 記録 - ${record.record}`;
+        if (record.distance) {
+            listItem.textContent += `, 距離 - ${record.distance}m`;
+        }
+        recordsList.appendChild(listItem);
+    });
 };
 

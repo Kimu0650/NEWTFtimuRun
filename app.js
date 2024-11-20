@@ -1,32 +1,30 @@
 const STORAGE_KEY = 'athlete_data';
 
-// 事前に登録する選手名
-const initialAthletes = [
-    "相方紫帆", "岩見琉音", "前田莉佐", "湯本真未",
-    "崎本七海", "佐藤安里紗", "永瀬裕大", "和田卓英",
-    "北川大喜", "木下裕翔", "中村香葉"
+// 事前登録する選手
+const defaultAthletes = [
+    "木村美海", "相方紫帆", "岩見琉音", "前田莉佐", "湯本真未",
+    "崎本七海", "佐藤安里紗", "永瀬裕大", "和田卓英", "北川大喜",
+    "木下裕翔", "中村香葉"
 ];
 
-// 選手データを取得
+// 選手データ取得
 function getAthleteData() {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 }
 
-// 選手データを保存
+// 選手データ保存
 function saveAthleteData(data) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-// 事前に選手を登録
-function registerInitialAthletes() {
+// 事前登録選手を追加
+function addDefaultAthletes() {
     const athleteData = getAthleteData();
-
-    initialAthletes.forEach((name) => {
+    defaultAthletes.forEach(name => {
         if (!athleteData[name]) {
             athleteData[name] = [];
         }
     });
-
     saveAthleteData(athleteData);
 }
 
@@ -130,7 +128,7 @@ document.getElementById('record-table-body').addEventListener('click', function 
 
 // ページ読み込み時に事前選手を登録し、選手リストを更新
 document.addEventListener('DOMContentLoaded', function () {
-    registerInitialAthletes(); // ページが読み込まれた時に事前選手を登録
+    addDefaultAthletes(); // ページが読み込まれた時に事前選手を登録
     populateAthleteSelect(); // 選手リストの更新
 });
 
