@@ -3,90 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>記録管理システム</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>選手記録</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.jsの読み込み -->
+    <script src="athletePage.js" defer></script>
 </head>
 <body>
-    <header>
-        <h1>記録管理システム</h1>
-    </header>
+    <h1 id="athlete-name">選手記録</h1>
 
-    <!-- 選手登録フォーム -->
-    <section id="register-athlete">
-        <h2>選手登録</h2>
+    <!-- 記録入力 -->
+    <section id="record-entry">
+        <h2>選手を選んで記録を入力</h2>
         <form id="register-athlete-form">
-            <label for="new-athlete-name">選手名を入力:</label>
-            <input type="text" id="new-athlete-name" placeholder="選手名" required>
-            <button type="submit">登録</button>
+            <input type="text" id="new-athlete-name" placeholder="選手名を入力">
+            <button type="submit">選手登録</button>
         </form>
-    </section>
 
-    <!-- 登録選手の選択フォーム -->
-    <section id="select-athlete">
-        <h2>記録を計測する選手を選択</h2>
+        <label for="athlete-select">選手を選択：</label>
         <select id="athlete-select" multiple></select>
-        <button id="add-selected-athletes">選手追加</button>
-    </section>
 
-    <!-- 記録入力フォーム -->
-    <section>
-        <h2>記録を入力</h2>
-        <form id="record-form">
-            <label for="athlete-select">選手選択:</label>
-            <select id="athlete-select" required></select>
+        <label for="event-select">種目を選択：</label>
+        <select id="event-select">
+            <option value="running">走る</option>
+            <option value="load_running">負荷走</option>
+            <option value="acceleration_running">加速走</option>
+            <option value="hurdles">ハードル</option>
+            <option value="long_jump">走幅跳</option>
+            <option value="high_jump">走高跳</option>
+            <option value="triple_jump">三段跳</option>
+            <option value="javelin_throw">槍投げ</option>
+            <option value="discus_throw">円盤投</option>
+        </select>
 
-            <label for="event-select">種目選択:</label>
-            <select id="event-select" required>
-                <option value="short-run">走る</option>
-                <option value="load-run">負荷走</option>
-                <option value="acceleration-run">加速走</option>
-                <option value="hurdles">ハードル</option>
-                <option value="long-jump">走幅跳</option>
-                <option value="high-jump">走高跳</option>
-                <option value="triple-jump">三段跳</option>
-                <option value="javelin">槍投げ</option>
-                <option value="discus">円盤投</option>
+        <div id="distance-section">
+            <label for="distance-select">距離を選択：</label>
+            <select id="distance-select">
+                <option value="30">30m</option>
+                <option value="50">50m</option>
+                <option value="70">70m</option>
+                <option value="100">100m</option>
+                <option value="120">120m</option>
+                <option value="150">150m</option>
+                <option value="200">200m</option>
+                <option value="250">250m</option>
+                <option value="300">300m</option>
+                <option value="400">400m</option>
+                <option value="manual">手動</option>
             </select>
+        </div>
 
-            <div id="distance-container" style="display: none;">
-                <label for="distance-select">距離:</label>
-                <select id="distance-select">
-                    <option value="30">30m</option>
-                    <option value="50">50m</option>
-                    <option value="70">70m</option>
-                    <option value="100">100m</option>
-                    <option value="120">120m</option>
-                    <option value="150">150m</option>
-                    <option value="200">200m</option>
-                    <option value="250">250m</option>
-                    <option value="300">300m</option>
-                    <option value="400">400m</option>
-                    <option value="manual">手動</option>
-                </select>
-            </div>
+        <label for="record-count">本数を選択：</label>
+        <select id="record-count">
+            <option value="1">1回</option>
+            <option value="2">2回</option>
+            <option value="3">3回</option>
+            <option value="4">4回</option>
+            <option value="5">5回</option>
+        </select>
 
-            <div id="record-container" style="display: none;">
-                <label for="record-input">記録:</label>
-                <input type="text" id="record-input" placeholder="例: 5.67 (m)">
-            </div>
-
-            <button type="button" id="save-record">記録を保存</button>
-        </form>
+        <button id="add-selected-athletes">選手を追加</button>
     </section>
 
-    <!-- 選手ページリンク -->
-    <section id="athlete-links">
-        <h2>選手別ページリンク</h2>
-        <ul id="athlete-links-list"></ul>
+    <!-- 記録のグラフ表示 -->
+    <section id="record-chart">
+        <h2>記録グラフ</h2>
+        <canvas id="athlete-record-chart"></canvas> <!-- グラフを表示するキャンバス -->
     </section>
 
-    <!-- 今日の記録 -->
-    <section>
-        <h2>今日の記録</h2>
-        <ul id="today-records-list"></ul>
+    <!-- 記録の一覧 -->
+    <section id="record-table">
+        <h2>記録</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>選手名</th>
+                    <th>種目</th>
+                    <th>距離</th>
+                    <th>タイム</th>
+                    <th>本数</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="record-table-body"></tbody>
+        </table>
     </section>
-
-    <script src="script.js"></script>
 </body>
 </html>
+
+<script>
+// 選手データのストレージキー
+const STORAGE_KEY = 'athlete_data';
+
+// 事前登録選手
+const defaultAthletes = [
+    "木村美海", "相方紫帆", "岩見琉音", "前田莉佐", "湯本真未",
+    "崎本七海", "佐藤安里紗", "永瀬裕大", "和田卓英", "北川大喜",
+    "木下裕翔", "中村香葉"
+];
+
+// 選手データ取得
+function getAthleteData() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+}
+
+// 選手データ保存
+function saveAthleteData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// 事前登録選手を追加
+function addDefaultAthletes() {
+    const athleteData = getAthleteData();
+    defaultAthletes.forEach(name => {
+        if (!athleteData[name]) {
+            athleteData[name] = [];
+        }
+    });
+    saveAthleteData(athleteData);
+}
+
+// 選手名を選択肢として表示
+function populateAthleteSelect() {
+    const athleteData = getAthleteData();
+    const athleteSelect = document.getElementById('athlete-select');
+    athleteSelect.innerHTML = '';
+
+    for (const name in athleteData) {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        athleteSelect.appendChild(option);
+    }
+}
+
+// 種目が変更された時に距離選択の表示を更新
+document.getElementById('event-select').addEventListener('change', function () {
+    const event = this.value;
+    const distanceSection = document.getElementById('distance-section');
+    const distanceSelect = document.getElementById('distance-select');
+
+    // 「走る」「負荷走」「加速走」「ハードル」の場合は距離選択を表示
+    if (['running', 'load_running', 'acceleration_running', 'hurdles'].includes(event)) {
+        distanceSection.style.display = 'block';
+    } else {
+        distanceSection.style.display = 'none';
+    }
+});
+
+// 選手を登録するイベント
+document.getElementById('register-athlete-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const newAthleteName = document.getElementById('new-athlete-name').value.trim();
+    const athleteData = getAthleteData();
+
+    if (newAthleteName && !athleteData[newAthleteName]) {
+        athleteData[newAthleteName] = [];
+        saveAthleteData(athleteData);
+        alert(`選手 "${newAthleteName}" を登録しました！`);
+        document.getElementById('new-athlete-name').value = '';
+        populateAthleteSelect();
+    } else {
+        alert('この選手はすでに登録されています！');
+    }
+});
+
+// 選手を記録表に追加する
+document.getElementById('add-selected-athletes').addEventListener('click', function () {
+    const selectedAthletes = Array.from(document.getElementById('athlete-select').selectedOptions);
+    const event = document.getElementById('event-select').value;
+    const distance = document.getElementById('distance-select').value;
+    const count = document.getElementById('record-count').value;
+
+    const tableBody = document.getElementById('record-table-body');
+
+    selectedAthletes.forEach((athlete) => {
+        for (let i = 0; i < count; i++) {
+            if (!document.querySelector(`tr[data-athlete="${athlete.value}"][data-event="${event}"]`)) {
+                const row = document.createElement('tr');
+                row.setAttribute('data-athlete', athlete.value);
+                row.setAttribute('data-event', event);
+                row.innerHTML = `
+                    <td>${athlete.value}</td>
+                    <td>${event}</td>
+                    <td>${distance === 'manual' ? '手動入力' : distance + 'm'}</td>
+                    <td><input type="number" step="0.1" class="distance-input"></td>
+                    <td><input type="number" step="0.01" class="time-input"></td>
+                    <td>
+                        <button class="save-record">記録を保存</button>
+                        <button class="delete-record">削除</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+    });
+});
+
+// 記録の保存と削除
+document.getElementById('record-table-body').addEventListener('click', function (e) {
+    if (e.target.classList.contains('save-record')) {
+        const row = e.target.closest('tr');
+        const timeInput = row.querySelector('.time-input');
+        const distanceInput = row.querySelector('.distance-input');
+
+        // 種目によって保存する記録を変える
+        if (['long_jump', 'high_jump', 'triple_jump', 'javelin_throw', 'discus_throw'].includes(row.getAttribute('data-event'))) {
+            row.cells[3].innerText = distanceInput.value + '.';
+        } else {
+            row.cells[3].innerText = distanceInput.value + 'm';
+        }
+
+        row.cells[4].innerText = timeInput.value;
+    } else if (e.target.classList.contains('delete-record')) {
+        const row = e.target.closest('tr');
+        if (confirm(`選手 (${row.cells[0].innerText}) の記録を削除してもよろしいですか？`)) {
+            row.remove();
+        }
+    }
+});
+
+addDefaultAthletes();
+populateAthleteSelect();
+</script>
 
