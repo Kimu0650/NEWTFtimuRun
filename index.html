@@ -86,6 +86,36 @@
             <tbody id="record-table-body"></tbody>
         </table>
     </section>
+
+    <!-- 選手個人ページへのリンク -->
+    <section id="athletes-links">
+        <h2>選手のページ</h2>
+        <ul id="athletes-list"></ul> <!-- 選手名リンク一覧 -->
+    </section>
+
+    <script>
+        // 選手個人ページへのリンクを生成
+        function generateAthletesLinks() {
+            const athleteData = getAthleteData();
+            const athletesList = document.getElementById('athletes-list');
+            athletesList.innerHTML = '';  // 既存のリンクをクリア
+
+            // 選手名ごとにリンクを作成
+            for (const name in athleteData) {
+                const listItem = document.createElement('li');
+                const athleteLink = document.createElement('a');
+                athleteLink.href = `athletePage.html?name=${name}`;  // 各選手のページURL
+                athleteLink.textContent = name;
+                listItem.appendChild(athleteLink);
+                athletesList.appendChild(listItem);
+            }
+        }
+
+        // ページ読み込み時にリンクを表示
+        document.addEventListener('DOMContentLoaded', function() {
+            generateAthletesLinks();
+        });
+    </script>
 </body>
 </html>
 
