@@ -86,13 +86,24 @@
         <button onclick="addNewAthlete()">登録</button>
     </section>
 
+    <!-- 選手選択と記録の入力部分 -->
+    <section id="athlete-selection">
+        <h2>選手を選んで記録を入力</h2>
+        <label for="athlete-select">選手を選択：</label>
+        <select id="athlete-select" multiple>
+            <!-- ここに事前登録選手のオプションを追加します -->
+        </select>
+
+        <button id="view-athlete-page">選手ページを確認</button>
+    </section>
+
     <script>
         // ローカルストレージに保存されている記録データを取得
         let records = JSON.parse(localStorage.getItem('records')) || [];
 
         const predefinedAthletes = [
-            '木村美海', '相方紫帆', '岩見琉音', '前田莉佐', 
-            '湯本真未', '崎本七海', '佐藤安里紗', '永瀬裕大', 
+            '木村美海', '相方紫帆', '岩見琉音', '前田莉佐',
+            '湯本真未', '崎本七海', '佐藤安里紗', '永瀬裕大',
             '和田卓英', '北川大喜', '木下裕翔', '中村香葉'
         ];
 
@@ -210,9 +221,10 @@
             renderTable();
         }
 
-        // 初回表示
+        // 初期化時にテーブルを描画
         renderTable();
     </script>
+
 </body>
 </html>
 
