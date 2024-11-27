@@ -23,7 +23,9 @@
     <section id="record-entry">
         <h2>選手を選んで記録を入力</h2>
         <label for="athlete-select">選手を選択：</label>
-        <select id="athlete-select" multiple></select>
+        <select id="athlete-select" multiple>
+            <!-- 事前登録選手を追加 -->
+        </select>
 
         <label for="event-select">種目を選択：</label>
         <select id="event-select">
@@ -70,13 +72,13 @@
     <!-- 記録のグラフ表示 -->
     <section id="record-chart">
         <h2>記録グラフ</h2>
-        <canvas id="athlete-record-chart"></canvas> <!-- グラフを表示するキャンバス -->
+        <canvas id="athlete-record-chart"></canvas>
     </section>
 
     <!-- 選手個人ページへのリンク -->
     <section id="athletes-links">
         <h2>選手のページ</h2>
-        <ul id="athletes-list"></ul> <!-- 選手名リンク一覧 -->
+        <ul id="athletes-list"></ul>
     </section>
 
     <!-- 記録の一覧 -->
@@ -101,10 +103,7 @@
     </section>
 
     <script>
-        // 記録データを格納するための配列
         let records = [];
-
-        // 事前登録の選手名
         const predefinedAthletes = [
             '木村美海', '相方紫帆', '岩見琉音', '前田莉佐', 
             '湯本真未', '崎本七海', '佐藤安里紗', '永瀬裕大', 
@@ -123,18 +122,31 @@
             });
         });
 
+        // 選手名を選択肢に追加
+        const athleteSelect = document.getElementById('athlete-select');
+        predefinedAthletes.forEach(athlete => {
+            const option = document.createElement('option');
+            option.value = athlete;
+            option.textContent = athlete;
+            athleteSelect.appendChild(option);
+        });
+
         // 新しい記録行を追加する関数
         function addNewRecordRow() {
-            const playerId = records.length + 1; // 新しいプレイヤーIDを作成
+            const selectedAthletes = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => option.value);
+            const event = document.getElementById('event-select').value;
+            const distance = document.getElementById('distance-select').value;
+            const count = parseInt(document.getElementById('record-count').value);
 
-            // 記録を追加
-            records.push({
-                playerId: playerId,
-                name: `選手${playerId}`, // 選手名 (例: 選手1, 選手2)
-                event: '',
-                distance: '',
-                records: [],
-                count: 1
+            selectedAthletes.forEach(athlete => {
+                records.push({
+                    playerId: records.length + 1,
+                    name: athlete,
+                    event: event,
+                    distance: distance,
+                    records: Array(count).fill(''),
+                    count: count
+                });
             });
 
             renderTable();
@@ -143,22 +155,16 @@
         // 記録テーブルを再描画する関数
         function renderTable() {
             const tbody = document.getElementById('record-table-body');
-            tbody.innerHTML = ''; // 既存のテーブル行をクリア
+            tbody.innerHTML = '';
 
             records.forEach((record, index) => {
                 const tr = document.createElement('tr');
                 
-                // 選手名
                 tr.innerHTML += `<td>${record.name}</td>`;
-                
-                // 種目
                 tr.innerHTML += `<td><input type="text" value="${record.event}" onchange="updateRecordField(${index}, 'event', this.value)" placeholder="種目名"></td>`;
-                
-                // 距離
                 tr.innerHTML += `<td><input type="text" value="${record.distance}" onchange="updateRecordField(${index}, 'distance', this.value)" 
 placeholder="距離"></td>`;
                 
-                // 記録入力（本数に応じた入力フィールド）
                 let recordInputs = '';
                 for (let i = 0; i < record.count; i++) {
                     recordInputs += `<input type="text" value="${record.records[i] || ''}" onchange="updateRecordField(${index}, 'records', this.value, ${i})" 
@@ -166,10 +172,8 @@ placeholder="タイム・記録 ${i+1}">`;
                 }
                 tr.innerHTML += `<td>${recordInputs}</td>`;
                 
-                // 本数入力と変更
                 tr.innerHTML += `<td><input type="number" value="${record.count}" onchange="updateRecordField(${index}, 'count', this.value)"></td>`;
                 
-                // 操作ボタン（新しい距離の記録を追加する）
                 tr.innerHTML += `<td><button onclick="addRecordForPlayer(${index})">新しい距離の記録を追加</button></td>`;
 
                 tbody.appendChild(tr);
@@ -179,14 +183,11 @@ placeholder="タイム・記録 ${i+1}">`;
         // 記録フィールドを更新する関数
         function updateRecordField(playerIndex, field, value, recordIndex = null) {
             if (field === 'count') {
-                // 本数を変更した場合、入力フィールドの数を調整
                 records[playerIndex].count = parseInt(value);
                 records[playerIndex].records.length = parseInt(value);
             } else if (field === 'records' && recordIndex !== null) {
-                // 特定の記録フィールドを更新
                 records[playerIndex].records[recordIndex] = value;
             } else {
-                // その他のフィールド（選手名や種目、距離）
                 records[playerIndex][field] = value;
             }
             renderTable();
