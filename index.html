@@ -12,7 +12,7 @@
     <section id="record-entry">
         <h2>選手を選んで記録を入力</h2>
         <label for="athlete-select">選手を選択：</label>
-        <select id="athlete-select">
+        <select id="athlete-select" multiple>
             <!-- 事前登録選手をここに追加 -->
         </select>
 
@@ -51,6 +51,7 @@
             <option value="3">3回</option>
             <option value="4">4回</option>
             <option value="5">5回</option>
+            <option value="5">手動</option>
         </select>
 
         <button id="add-selected-athletes">選手を追加</button>
@@ -85,17 +86,14 @@
     </section>
 
     <script>
-        // 記録データを格納するための配列
         let records = [];
-
-        // 事前登録の選手名
         const predefinedAthletes = [
             '木村美海', '相方紫帆', '岩見琉音', '前田莉佐', 
             '湯本真未', '崎本七海', '佐藤安里紗', '永瀬裕大', 
             '和田卓英', '北川大喜', '木下裕翔', '中村香葉'
         ];
 
-        // 事前登録選手をrecords配列に追加
+        // 事前登録選手を記録配列に追加
         predefinedAthletes.forEach(name => {
             records.push({
                 playerId: records.length + 1,
@@ -111,22 +109,19 @@
         const athleteSelect = document.getElementById('athlete-select');
         predefinedAthletes.forEach((name, index) => {
             const option = document.createElement('option');
-            option.value = index + 1;  // 1から始めるID
+            option.value = index + 1;
             option.textContent = name;
             athleteSelect.appendChild(option);
         });
 
-        // 新しい選手をrecords配列に追加する関数
+        // 新しい選手を追加する関数
         function addNewAthlete() {
             const newAthleteName = document.getElementById('new-athlete-name').value.trim();
-
-            // 名前が空の場合は追加しない
             if (!newAthleteName) {
                 alert('選手名を入力してください。');
                 return;
             }
 
-            // 新しい選手を追加
             records.push({
                 playerId: records.length + 1,
                 name: newAthleteName,
@@ -136,93 +131,76 @@
                 count: 1
             });
 
-            // 選手選択のドロップダウンにも新しい選手を追加
             const option = document.createElement('option');
-            option.value = records.length;  // 新しい選手のID
+            option.value = records.length;
             option.textContent = newAthleteName;
             athleteSelect.appendChild(option);
 
-            // 選手名入力フォームをリセット
             document.getElementById('new-athlete-name').value = '';
         }
 
         // 選手を追加する関数
         document.getElementById('add-selected-athletes').addEventListener('click', function() {
-            const selectedAthleteId = parseInt(document.getElementById('athlete-select').value);
+            const selectedAthleteIds = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => parseInt(option.value));
             const event = document.getElementById('event-select').value;
             const distance = document.getElementById('distance-select').value;
             const recordCount = parseInt(document.getElementById('record-count').value);
 
-            // 選手が選ばれていない場合は警告を表示
-            if (!selectedAthleteId) {
+            if (selectedAthleteIds.length === 0) {
                 alert('選手を選択してください。');
                 return;
             }
 
-            // 選択した選手のIDに基づいて記録を追加
-            const athlete = records[selectedAthleteId - 1];
-            athlete.event = event;
-            athlete.distance = distance;
-            athlete.count = recordCount;
-            athlete.records = new Array(recordCount).fill('');
+            selectedAthleteIds.forEach(id => {
+                const athlete = records[id - 1];
+                athlete.event = event;
+                athlete.distance = distance;
+                athlete.count = recordCount;
+                athlete.records.push(...new Array(recordCount).fill(''));
+            });
 
             renderTable();
         });
 
-        // 記録テーブルを再描画する関数
+        // 記録テーブルを描画
         function renderTable() {
             const tbody = document.getElementById('record-table-body');
-            tbody.innerHTML = ''; // 既存のテーブル行をクリア
+            tbody.innerHTML = '';
 
             records.forEach((record, index) => {
-                // 記録が設定されていない選手はスキップ
-                if (record.event === '' || record.distance === '') {
-                    return;
-                }
+                if (record.event === '' || record.distance === '') return;
 
                 const tr = document.createElement('tr');
-
-                // 選手名
                 tr.innerHTML += `<td>${record.name}</td>`;
-
-                // 種目
                 tr.innerHTML += `<td>${record.event}</td>`;
-
-                // 距離
                 tr.innerHTML += `<td>${record.distance}</td>`;
 
-                // 記録入力（本数に応じた入力フィールド）
                 let recordInputs = '';
                 for (let i = 0; i < record.count; i++) {
-                    recordInputs += `<input type="text" value="${record.records[i] || ''}" onchange="updateRecordField(${index}, 'records', this.value, ${i})" 
-placeholder="タイム・記録 ${i+1}">`;
+                    recordInputs += `<input type="text" value="${record.records[i]}" onchange="updateRecordField(${index}, 'records', this.value, ${i})" 
+placeholder="タイム・記録"> `;
                 }
                 tr.innerHTML += `<td>${recordInputs}</td>`;
-
-                // 本数入力
-                tr.innerHTML += `<td><input type="number" value="${record.count}" onchange="updateRecordField(${index}, 'count', this.value)"></td>`;
-
-                // 削除ボタン
+                tr.innerHTML += `<td>${record.count}</td>`;
                 tr.innerHTML += `<td><button onclick="deleteRecord(${index})">削除</button></td>`;
-
                 tbody.appendChild(tr);
             });
         }
 
-        // 記録フィールドを更新する関数
+        // 記録を更新
         function updateRecordField(playerIndex, field, value, index) {
             if (field === 'records') {
-                records[playerIndex].records[index] = value;
+                records[playerIndex][field][index] = value;
             } else {
                 records[playerIndex][field] = value;
             }
             renderTable();
         }
 
-        // 記録を削除する関数
+        // 記録を削除
         function deleteRecord(playerIndex) {
-            records.splice(playerIndex, 1);  // 選手を削除
-            renderTable();  // テーブルを再描画
+            records.splice(playerIndex, 1);
+            renderTable();
         }
 
         // 最初にテーブルを描画
