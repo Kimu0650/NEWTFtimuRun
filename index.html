@@ -195,14 +195,8 @@
         // 選手の記録を保存
         function saveRecord(recordIndex) {
             const record = records[recordIndex];
-            localStorage.setItem('records', JSON.stringify(records));
-            alert('記録が保存されました');
-        }
-
-        // 記録を削除
-        function deleteRecord(recordIndex) {
-            records.splice(recordIndex, 1);
-            renderTable();  // テーブルを再描画
+            localStorage.setItem('records', JSON.stringify(records)); // 記録をローカルストレージに保存
+            alert('記録が保存されました。');
         }
 
         // 記録フィールドを更新
@@ -210,10 +204,15 @@
             records[recordIndex][field][index] = value;
         }
 
+        // 記録を削除
+        function deleteRecord(recordIndex) {
+            records.splice(recordIndex, 1);
+            renderTable();  // 記録表を再描画
+        }
+
         // 初期化時にテーブルを描画
         renderTable();
     </script>
-
 </body>
 </html>
 
