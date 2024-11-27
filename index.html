@@ -144,7 +144,9 @@
 
         // 選手を追加する関数
         document.getElementById('add-selected-athletes').addEventListener('click', function() {
-            const selectedAthleteIds = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => parseInt(option.value));
+            const selectedAthleteIds = 
+Array.from(document.getElementById('athlete-select').selectedOptions).map(option => 
+parseInt(option.value));
             const event = document.getElementById('event-select').value;
             const distance = document.getElementById('distance-select').value;
             const recordCount = parseInt(document.getElementById('record-count').value);
@@ -177,13 +179,15 @@
                 if (record.event === '' || record.distance === '') return;
 
                 const tr = document.createElement('tr');
-                tr.innerHTML += `<td>${record.name}</td>`;
+                tr.innerHTML += `<td><a href="athlete_page.html?athleteId=${index}" 
+target="_blank">${record.name}</a></td>`;
                 tr.innerHTML += `<td>${record.event}</td>`;
                 tr.innerHTML += `<td>${record.distance}</td>`;
 
                 let recordInputs = '';
                 for (let i = 0; i < record.count; i++) {
-                    recordInputs += `<input type="text" value="${record.records[i]}" onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
+                    recordInputs += `<input type="text" value="${record.records[i]}" 
+onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
                 }
                 tr.innerHTML += `<td>${recordInputs}</td>`;
 
@@ -203,21 +207,16 @@
             });
         }
 
-        // 記録を更新
-        function updateRecordField(recordIndex, field, value, recordIndexInArray) {
-            records[recordIndex][field][recordIndexInArray] = value;
-        }
-
-        // 記録を保存
+        // 選手の記録を保存
         function saveRecord(recordIndex) {
+            const record = records[recordIndex];
             localStorage.setItem('records', JSON.stringify(records));
-            alert('記録が保存されました。');
+            alert('記録が保存されました');
         }
 
         // 記録を削除
-        function deleteRecord(index) {
-            records.splice(index, 1);
-            localStorage.setItem('records', JSON.stringify(records));
+        function deleteRecord(recordIndex) {
+            records.splice(recordIndex, 1);
             renderTable();
         }
 
