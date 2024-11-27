@@ -12,7 +12,9 @@
     <section id="record-entry">
         <h2>選手を選んで記録を入力</h2>
         <label for="athlete-select">選手を選択：</label>
-        <select id="athlete-select" multiple></select>
+        <select id="athlete-select" multiple>
+            <!-- 事前登録選手をここに追加 -->
+        </select>
 
         <label for="event-select">種目を選択：</label>
         <select id="event-select">
@@ -77,6 +79,14 @@
         <button onclick="addNewRecordRow()">新しい選手の記録を追加</button>
     </section>
 
+    <!-- 新規選手登録 -->
+    <section id="new-athlete-registration">
+        <h2>新規選手登録</h2>
+        <label for="new-athlete-name">選手名：</label>
+        <input type="text" id="new-athlete-name" placeholder="新しい選手の名前">
+        <button onclick="addNewAthlete()">登録</button>
+    </section>
+
     <script>
         // 記録データを格納するための配列
         let records = [];
@@ -99,6 +109,45 @@
                 count: 1
             });
         });
+
+        // 事前登録選手を選手選択ドロップダウンに追加
+        const athleteSelect = document.getElementById('athlete-select');
+        predefinedAthletes.forEach((name, index) => {
+            const option = document.createElement('option');
+            option.value = index + 1;  // 1から始めるID
+            option.textContent = name;
+            athleteSelect.appendChild(option);
+        });
+
+        // 新しい選手をrecords配列に追加する関数
+        function addNewAthlete() {
+            const newAthleteName = document.getElementById('new-athlete-name').value.trim();
+
+            // 名前が空の場合は追加しない
+            if (!newAthleteName) {
+                alert('選手名を入力してください。');
+                return;
+            }
+
+            // 新しい選手を追加
+            records.push({
+                playerId: records.length + 1,
+                name: newAthleteName,
+                event: '',
+                distance: '',
+                records: [],
+                count: 1
+            });
+
+            // 選手選択のドロップダウンにも新しい選手を追加
+            const option = document.createElement('option');
+            option.value = records.length;  // 新しい選手のID
+            option.textContent = newAthleteName;
+            athleteSelect.appendChild(option);
+
+            // 選手名入力フォームをリセット
+            document.getElementById('new-athlete-name').value = '';
+        }
 
         // 新しい記録行を追加する関数
         function addNewRecordRow() {
@@ -159,32 +208,26 @@ placeholder="タイム・記録 ${i+1}">`;
         }
 
         // 記録フィールドを更新する関数
-        function updateRecordField(playerIndex, field, value, recordIndex = null) {
-            if (field === 'count') {
-                // 本数を変更した場合、入力フィールドの数を調整
-                records[playerIndex].count = parseInt(value);
-                records[playerIndex].records.length = parseInt(value);
-            } else if (field === 'records' && recordIndex !== null) {
-                // 特定の記録フィールドを更新
-                records[playerIndex].records[recordIndex] = value;
+        function updateRecordField(playerIndex, field, value, index) {
+            if (field === 'records') {
+                records[playerIndex].records[index] = value;
             } else {
-                // その他のフィールド（選手名や種目、距離）
                 records[playerIndex][field] = value;
             }
             renderTable();
         }
 
-        // 新しい距離の記録を追加する関数
+        // 記録フィールド（本数）変更後の追加処理
         function addRecordForPlayer(playerIndex) {
-            records[playerIndex].count++;
-            records[playerIndex].records.push('');
+            const count = records[playerIndex].count;
+            records[playerIndex].count = count + 1;  // 本数を1増やす
+            records[playerIndex].records.push('');  // 新しい記録入力フィールドを追加
             renderTable();
         }
 
-        // ページ読み込み時にテーブルを描画しないようにする
-        // renderTable();  // これを削除またはコメントアウト
+        // 最初にテーブルを描画
+        renderTable();
     </script>
-
 </body>
 </html>
 
