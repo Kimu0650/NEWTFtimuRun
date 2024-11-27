@@ -4,28 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>選手記録管理</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="athletePage.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1 id="athlete-name">選手記録</h1>
-
-    <!-- 選手登録フォーム -->
-    <section id="athlete-registration">
-        <h2>選手登録</h2>
-        <form id="register-athlete-form">
-            <input type="text" id="new-athlete-name" placeholder="選手名を入力">
-            <button type="submit">選手登録</button>
-        </form>
-    </section>
 
     <!-- 記録入力 -->
     <section id="record-entry">
         <h2>選手を選んで記録を入力</h2>
         <label for="athlete-select">選手を選択：</label>
-        <select id="athlete-select" multiple>
-            <!-- 事前登録選手を追加 -->
-        </select>
+        <select id="athlete-select" multiple></select>
 
         <label for="event-select">種目を選択：</label>
         <select id="event-select">
@@ -69,19 +56,7 @@
         <button id="add-selected-athletes">選手を追加</button>
     </section>
 
-    <!-- 記録のグラフ表示 -->
-    <section id="record-chart">
-        <h2>記録グラフ</h2>
-        <canvas id="athlete-record-chart"></canvas>
-    </section>
-
-    <!-- 選手個人ページへのリンク -->
-    <section id="athletes-links">
-        <h2>選手のページ</h2>
-        <ul id="athletes-list"></ul>
-    </section>
-
-    <!-- 記録の一覧 -->
+    <!-- 記録表 -->
     <section id="record-table">
         <h2>記録</h2>
         <table>
@@ -103,7 +78,10 @@
     </section>
 
     <script>
+        // 記録データを格納するための配列
         let records = [];
+
+        // 事前登録の選手名
         const predefinedAthletes = [
             '木村美海', '相方紫帆', '岩見琉音', '前田莉佐', 
             '湯本真未', '崎本七海', '佐藤安里紗', '永瀬裕大', 
@@ -122,49 +100,47 @@
             });
         });
 
-        // 選手名を選択肢に追加
-        const athleteSelect = document.getElementById('athlete-select');
-        predefinedAthletes.forEach(athlete => {
-            const option = document.createElement('option');
-            option.value = athlete;
-            option.textContent = athlete;
-            athleteSelect.appendChild(option);
-        });
-
         // 新しい記録行を追加する関数
         function addNewRecordRow() {
-            const selectedAthletes = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => option.value);
-            const event = document.getElementById('event-select').value;
-            const distance = document.getElementById('distance-select').value;
-            const count = parseInt(document.getElementById('record-count').value);
+            const playerId = records.length + 1; // 新しいプレイヤーIDを作成
 
-            selectedAthletes.forEach(athlete => {
-                records.push({
-                    playerId: records.length + 1,
-                    name: athlete,
-                    event: event,
-                    distance: distance,
-                    records: Array(count).fill(''),
-                    count: count
-                });
+            // 記録を追加
+            records.push({
+                playerId: playerId,
+                name: `選手${playerId}`, // 選手名 (例: 選手1, 選手2)
+                event: '',
+                distance: '',
+                records: [],
+                count: 1
             });
 
-            renderTable();
+            renderTable();  // 記録テーブルを更新
         }
 
         // 記録テーブルを再描画する関数
         function renderTable() {
             const tbody = document.getElementById('record-table-body');
-            tbody.innerHTML = '';
+            tbody.innerHTML = ''; // 既存のテーブル行をクリア
 
             records.forEach((record, index) => {
+                // 初期状態で記録が追加されていない選手はテーブルに表示しない
+                if (record.event === '' && record.distance === '') {
+                    return;
+                }
+
                 const tr = document.createElement('tr');
                 
-                tr.innerHTML += `<td>${record.name}</td>`;
+                // 選手名
+                tr.innerHTML += `<td><a href="athletePage.html?playerId=${record.playerId}">${record.name}</a></td>`;
+                
+                // 種目
                 tr.innerHTML += `<td><input type="text" value="${record.event}" onchange="updateRecordField(${index}, 'event', this.value)" placeholder="種目名"></td>`;
+                
+                // 距離
                 tr.innerHTML += `<td><input type="text" value="${record.distance}" onchange="updateRecordField(${index}, 'distance', this.value)" 
 placeholder="距離"></td>`;
                 
+                // 記録入力（本数に応じた入力フィールド）
                 let recordInputs = '';
                 for (let i = 0; i < record.count; i++) {
                     recordInputs += `<input type="text" value="${record.records[i] || ''}" onchange="updateRecordField(${index}, 'records', this.value, ${i})" 
@@ -172,8 +148,10 @@ placeholder="タイム・記録 ${i+1}">`;
                 }
                 tr.innerHTML += `<td>${recordInputs}</td>`;
                 
+                // 本数入力と変更
                 tr.innerHTML += `<td><input type="number" value="${record.count}" onchange="updateRecordField(${index}, 'count', this.value)"></td>`;
                 
+                // 操作ボタン（新しい距離の記録を追加する）
                 tr.innerHTML += `<td><button onclick="addRecordForPlayer(${index})">新しい距離の記録を追加</button></td>`;
 
                 tbody.appendChild(tr);
@@ -183,11 +161,14 @@ placeholder="タイム・記録 ${i+1}">`;
         // 記録フィールドを更新する関数
         function updateRecordField(playerIndex, field, value, recordIndex = null) {
             if (field === 'count') {
+                // 本数を変更した場合、入力フィールドの数を調整
                 records[playerIndex].count = parseInt(value);
                 records[playerIndex].records.length = parseInt(value);
             } else if (field === 'records' && recordIndex !== null) {
+                // 特定の記録フィールドを更新
                 records[playerIndex].records[recordIndex] = value;
             } else {
+                // その他のフィールド（選手名や種目、距離）
                 records[playerIndex][field] = value;
             }
             renderTable();
@@ -200,9 +181,10 @@ placeholder="タイム・記録 ${i+1}">`;
             renderTable();
         }
 
-        // ページ読み込み時にテーブルを描画
-        renderTable();
+        // ページ読み込み時にテーブルを描画しないようにする
+        // renderTable();  // これを削除またはコメントアウト
     </script>
+
 </body>
 </html>
 

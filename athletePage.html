@@ -1,46 +1,72 @@
-<!DOCTYPE html>
+k<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選手記録</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.jsの読み込み -->
-    <script src="athletePage.js" defer></script>
+    <title>選手記録詳細</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- 選手ページのヘッダー -->
-    <header>
-        <h1 id="athlete-name"></h1>
-        <a href="index.html">戻る</a>
-    </header>
 
-    <!-- 記録グラフ表示 -->
-    <section id="record-chart">
-        <h2>記録グラフ</h2>
-        <canvas id="athlete-record-chart"></canvas> <!-- グラフを表示するキャンバス -->
-    </section>
+    <h1>選手記録詳細</h1>
 
-    <!-- 記録テーブル表示 -->
-    <section id="record-table">
-        <h2>記録</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>距離 (m)</th>
-                    <th>タイム (秒)</th>
-                    <th>日付</th>
-                    <th>操作</th> <!-- 削除ボタン用の列 -->
-                </tr>
-            </thead>
-            <tbody id="record-table-body"></tbody>
-        </table>
-    </section>
+    <div id="athlete-records">
+        <!-- 選手の記録とグラフがここに表示されます -->
+    </div>
 
-    <!-- 選手の詳細記録リスト -->
-    <section id="records-section">
-        <h2>詳細記録</h2>
-        <ul id="records-list"></ul>
-    </section>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const playerId = urlParams.get('playerId');
+
+        // 仮の記録データ（実際のデータはバックエンドから取得する）
+        const athleteRecords = [
+            { playerId: 1, name: '木村美海', event: 'ダッシュ', distance: '100', records: ['12.3', '12.5', '12.2'] },
+            { playerId: 2, name: '相方紫帆', event: 'ハードル', distance: '50', records: ['15.2', '15.3', '15.0'] }
+        ];
+
+        // 指定された選手の記録を取得
+        const athlete = athleteRecords.find(record => record.playerId == playerId);
+
+        if (athlete) {
+            // 選手名と記録を表示
+            document.getElementById('athlete-records').innerHTML = `
+                <h2>${athlete.name}の記録</h2>
+                <p>種目: ${athlete.event}</p>
+                <p>距離: ${athlete.distance}m</p>
+                <h3>記録</h3>
+                <ul>
+                    ${athlete.records.map(record => `<li>${record}秒</li>`).join('')}
+                </ul>
+                <h3>記録グラフ</h3>
+                <canvas id="record-chart"></canvas>
+            `;
+
+            // グラフ描画 (Chart.jsを使う)
+            const ctx = document.getElementById('record-chart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: athlete.records.length }, (_, i) => `試合 ${i + 1}`),
+                    datasets: [{
+                        label: '記録',
+                        data: athlete.records.map(record => parseFloat(record)),
+                        borderColor: 'rgb(75, 192, 192)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('athlete-records').innerHTML = '<p>選手が見つかりませんでした。</p>';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
 
