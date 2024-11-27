@@ -51,7 +51,6 @@
             <option value="3">3回</option>
             <option value="4">4回</option>
             <option value="5">5回</option>
-            <option value="5">手動</option>
         </select>
 
         <button id="add-selected-athletes">選手を追加</button>
@@ -66,9 +65,11 @@
                     <th>選手名</th>
                     <th>種目</th>
                     <th>距離</th>
-                    <th>タイム・記録</th>
+                    <th>記録</th>
                     <th>本数</th>
+                    <th>日付</th>
                     <th>削除</th>
+                    <th>保存</th>
                 </tr>
             </thead>
             <tbody id="record-table-body">
@@ -86,24 +87,14 @@
     </section>
 
     <script>
-        let records = [];
+        // ローカルストレージに保存されている記録データを取得
+        let records = JSON.parse(localStorage.getItem('records')) || [];
+
         const predefinedAthletes = [
             '木村美海', '相方紫帆', '岩見琉音', '前田莉佐', 
             '湯本真未', '崎本七海', '佐藤安里紗', '永瀬裕大', 
             '和田卓英', '北川大喜', '木下裕翔', '中村香葉'
         ];
-
-        // 事前登録選手を記録配列に追加
-        predefinedAthletes.forEach(name => {
-            records.push({
-                playerId: records.length + 1,
-                name: name,
-                event: '',
-                distance: '',
-                records: [],
-                count: 1
-            });
-        });
 
         // 事前登録選手を選手選択ドロップダウンに追加
         const athleteSelect = document.getElementById('athlete-select');
@@ -128,7 +119,8 @@
                 event: '',
                 distance: '',
                 records: [],
-                count: 1
+                count: 1,
+                date: new Date().toLocaleDateString() // 現在の日付を記録
             });
 
             const option = document.createElement('option');
@@ -151,11 +143,14 @@
                 return;
             }
 
+            const date = new Date().toLocaleDateString(); // 現在の日付を取得
+
             selectedAthleteIds.forEach(id => {
                 const athlete = records[id - 1];
                 athlete.event = event;
                 athlete.distance = distance;
                 athlete.count = recordCount;
+                athlete.date = date; // 同じ日に記録
                 athlete.records.push(...new Array(recordCount).fill(''));
             });
 
@@ -177,36 +172,47 @@
 
                 let recordInputs = '';
                 for (let i = 0; i < record.count; i++) {
-                    recordInputs += `<input type="text" value="${record.records[i]}" onchange="updateRecordField(${index}, 'records', this.value, ${i})" 
-placeholder="タイム・記録"> `;
+                    recordInputs += `<input type="text" value="${record.records[i]}" onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
                 }
                 tr.innerHTML += `<td>${recordInputs}</td>`;
+
+                // 本数を表示
                 tr.innerHTML += `<td>${record.count}</td>`;
+
+                // 日付を表示
+                tr.innerHTML += `<td>${record.date}</td>`;
+
+                // 削除ボタン
                 tr.innerHTML += `<td><button onclick="deleteRecord(${index})">削除</button></td>`;
+
+                // 保存ボタン
+                tr.innerHTML += `<td><button onclick="saveRecord(${index})">保存</button></td>`;
+
                 tbody.appendChild(tr);
             });
         }
 
         // 記録を更新
-        function updateRecordField(playerIndex, field, value, index) {
-            if (field === 'records') {
-                records[playerIndex][field][index] = value;
-            } else {
-                records[playerIndex][field] = value;
-            }
-            renderTable();
+        function updateRecordField(recordIndex, field, value, recordIndexInArray) {
+            records[recordIndex][field][recordIndexInArray] = value;
+        }
+
+        // 記録を保存
+        function saveRecord(recordIndex) {
+            localStorage.setItem('records', JSON.stringify(records));
+            alert('記録が保存されました。');
         }
 
         // 記録を削除
-        function deleteRecord(playerIndex) {
-            records.splice(playerIndex, 1);
+        function deleteRecord(index) {
+            records.splice(index, 1);
+            localStorage.setItem('records', JSON.stringify(records));
             renderTable();
         }
 
-        // 最初にテーブルを描画
+        // 初回表示
         renderTable();
     </script>
-
 </body>
 </html>
 
