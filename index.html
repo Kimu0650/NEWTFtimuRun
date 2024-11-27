@@ -86,17 +86,6 @@
         <button onclick="addNewAthlete()">登録</button>
     </section>
 
-    <!-- 選手選択と記録の入力部分 -->
-    <section id="athlete-selection">
-        <h2>選手を選んで記録を入力</h2>
-        <label for="athlete-select">選手を選択：</label>
-        <select id="athlete-select" multiple>
-            <!-- ここに事前登録選手のオプションを追加します -->
-        </select>
-
-        <button id="view-athlete-page">選手ページを確認</button>
-    </section>
-
     <script>
         // ローカルストレージに保存されている記録データを取得
         let records = JSON.parse(localStorage.getItem('records')) || [];
@@ -144,9 +133,7 @@
 
         // 選手を追加する関数
         document.getElementById('add-selected-athletes').addEventListener('click', function() {
-            const selectedAthleteIds = 
-Array.from(document.getElementById('athlete-select').selectedOptions).map(option => 
-parseInt(option.value));
+            const selectedAthleteIds = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => parseInt(option.value));
             const event = document.getElementById('event-select').value;
             const distance = document.getElementById('distance-select').value;
             const recordCount = parseInt(document.getElementById('record-count').value);
@@ -164,30 +151,28 @@ parseInt(option.value));
                 athlete.distance = distance;
                 athlete.count = recordCount;
                 athlete.date = date; // 同じ日に記録
-                athlete.records.push(...new Array(recordCount).fill(''));
+                athlete.records.push(...new Array(recordCount).fill('')); // 記録を追加
             });
 
-            renderTable();
+            renderTable();  // 記録表を再描画
         });
 
         // 記録テーブルを描画
         function renderTable() {
             const tbody = document.getElementById('record-table-body');
-            tbody.innerHTML = '';
+            tbody.innerHTML = '';  // 既存の行をクリア
 
             records.forEach((record, index) => {
                 if (record.event === '' || record.distance === '') return;
 
                 const tr = document.createElement('tr');
-                tr.innerHTML += `<td><a href="athlete_page.html?athleteId=${index}" 
-target="_blank">${record.name}</a></td>`;
+                tr.innerHTML += `<td><a href="athlete_page.html?athleteId=${index}" target="_blank">${record.name}</a></td>`;
                 tr.innerHTML += `<td>${record.event}</td>`;
                 tr.innerHTML += `<td>${record.distance}</td>`;
 
                 let recordInputs = '';
                 for (let i = 0; i < record.count; i++) {
-                    recordInputs += `<input type="text" value="${record.records[i]}" 
-onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
+                    recordInputs += `<input type="text" value="${record.records[i]}" onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
                 }
                 tr.innerHTML += `<td>${recordInputs}</td>`;
 
@@ -203,7 +188,7 @@ onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
                 // 保存ボタン
                 tr.innerHTML += `<td><button onclick="saveRecord(${index})">保存</button></td>`;
 
-                tbody.appendChild(tr);
+                tbody.appendChild(tr); // 行をテーブルに追加
             });
         }
 
@@ -217,7 +202,12 @@ onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
         // 記録を削除
         function deleteRecord(recordIndex) {
             records.splice(recordIndex, 1);
-            renderTable();
+            renderTable();  // テーブルを再描画
+        }
+
+        // 記録フィールドを更新
+        function updateRecordField(recordIndex, field, value, index) {
+            records[recordIndex][field][index] = value;
         }
 
         // 初期化時にテーブルを描画
