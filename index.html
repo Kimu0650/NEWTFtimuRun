@@ -151,7 +151,7 @@
                 athlete.distance = distance;
                 athlete.count = recordCount;
                 athlete.date = date; // 同じ日に記録
-                athlete.records.push(...new Array(recordCount).fill('')); // 記録を追加
+                athlete.records = Array(recordCount).fill(''); // 新しい記録のために空の配列を作成
             });
 
             renderTable();  // 記録表を再描画
