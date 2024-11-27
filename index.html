@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選手記録管理</title> <!-- タイトルを変更 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.jsの読み込み -->
+    <title>選手記録管理</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="athletePage.js" defer></script>
 </head>
 <body>
     <h1 id="athlete-name">選手記録</h1>
 
-    <!-- 記録入力 -->
-    <section id="record-entry">
-        <h2>選手を選んで記録を入力</h2>
+    <!-- 選手登録フォーム -->
+    <section id="athlete-registration">
+        <h2>選手登録</h2>
         <form id="register-athlete-form">
             <input type="text" id="new-athlete-name" placeholder="選手名を入力">
             <button type="submit">選手登録</button>
         </form>
+    </section>
 
+    <!-- 記録入力 -->
+    <section id="record-entry">
+        <h2>選手を選んで記録を入力</h2>
         <label for="athlete-select">選手を選択：</label>
         <select id="athlete-select" multiple></select>
 
@@ -69,7 +73,6 @@
         <canvas id="athlete-record-chart"></canvas> <!-- グラフを表示するキャンバス -->
     </section>
 
-
     <!-- 選手個人ページへのリンク -->
     <section id="athletes-links">
         <h2>選手のページ</h2>
@@ -100,6 +103,25 @@
     <script>
         // 記録データを格納するための配列
         let records = [];
+
+        // 事前登録の選手名
+        const predefinedAthletes = [
+            '木村美海', '相方紫帆', '岩見琉音', '前田莉佐', 
+            '湯本真未', '崎本七海', '佐藤安里紗', '永瀬裕大', 
+            '和田卓英', '北川大喜', '木下裕翔', '中村香葉'
+        ];
+
+        // 事前登録選手をrecords配列に追加
+        predefinedAthletes.forEach(name => {
+            records.push({
+                playerId: records.length + 1,
+                name: name,
+                event: '',
+                distance: '',
+                records: [],
+                count: 1
+            });
+        });
 
         // 新しい記録行を追加する関数
         function addNewRecordRow() {
@@ -133,12 +155,14 @@
                 tr.innerHTML += `<td><input type="text" value="${record.event}" onchange="updateRecordField(${index}, 'event', this.value)" placeholder="種目名"></td>`;
                 
                 // 距離
-                tr.innerHTML += `<td><input type="text" value="${record.distance}" onchange="updateRecordField(${index}, 'distance', this.value)" placeholder="距離"></td>`;
+                tr.innerHTML += `<td><input type="text" value="${record.distance}" onchange="updateRecordField(${index}, 'distance', this.value)" 
+placeholder="距離"></td>`;
                 
                 // 記録入力（本数に応じた入力フィールド）
                 let recordInputs = '';
                 for (let i = 0; i < record.count; i++) {
-                    recordInputs += `<input type="text" value="${record.records[i] || ''}" onchange="updateRecordField(${index}, 'records', this.value, ${i})" placeholder="タイム・記録 ${i+1}">`;
+                    recordInputs += `<input type="text" value="${record.records[i] || ''}" onchange="updateRecordField(${index}, 'records', this.value, ${i})" 
+placeholder="タイム・記録 ${i+1}">`;
                 }
                 tr.innerHTML += `<td>${recordInputs}</td>`;
                 
@@ -174,30 +198,9 @@
             records[playerIndex].records.push('');
             renderTable();
         }
-    </script>
 
-    <script>
-        // 選手個人ページへのリンクを生成
-        function generateAthletesLinks() {
-            const athleteData = getAthleteData();
-            const athletesList = document.getElementById('athletes-list');
-            athletesList.innerHTML = '';  // 既存のリンクをクリア
-
-            // 選手名ごとにリンクを作成
-            for (const name in athleteData) {
-                const listItem = document.createElement('li');
-                const athleteLink = document.createElement('a');
-                athleteLink.href = `athletePage.html?name=${name}`;  // 各選手のページURL
-                athleteLink.textContent = name;
-                listItem.appendChild(athleteLink);
-                athletesList.appendChild(listItem);
-            }
-        }
-
-        // ページ読み込み時にリンクを表示
-        document.addEventListener('DOMContentLoaded', function() {
-            generateAthletesLinks();
-        });
+        // ページ読み込み時にテーブルを描画
+        renderTable();
     </script>
 </body>
 </html>
