@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保存された記録</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>保存された記録</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>選手名</th>
+            <th>種目</th>
+            <th>距離</th>
+            <th>記録</th>
+            <th>本数</th>
+            <th>日付</th>
+        </tr>
+    </thead>
+    <tbody id="saved-records-table">
+        <!-- 保存された記録はここに追加されます -->
+    </tbody>
+</table>
+
+<script>
+    // ローカルストレージから記録を取得して表示
+    function loadSavedRecords() {
+        const savedRecords = JSON.parse(localStorage.getItem('records') || '[]');
+        const tableBody = document.getElementById('saved-records-table');
+
+        // テーブルに記録を表示
+        savedRecords.forEach(record => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${record.name}</td>
+                <td>${record.event}</td>
+                <td>${record.distance}</td>
+                <td>${record.records.join(', ')}</td>
+                <td>${record.count}</td>
+                <td>${record.date}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // ページ読み込み時に記録を表示
+    window.onload = loadSavedRecords;
+</script>
+
+</body>
+</html>
+
