@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>保存された記録</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -34,34 +38,43 @@
             <th>日付</th>
         </tr>
     </thead>
-    <tbody id="saved-records-table">
-        <!-- 保存された記録はここに追加されます -->
+    <tbody id="saved-records-table-body">
+        <!-- 保存された記録の行がここに追加される -->
     </tbody>
 </table>
 
+<!-- ホームへ戻るボタン -->
+<br>
+<button id="back-to-home">ホームに戻る</button>
+
 <script>
-    // ローカルストレージから記録を取得して表示
-    function loadSavedRecords() {
-        const savedRecords = JSON.parse(localStorage.getItem('records') || '[]');
-        const tableBody = document.getElementById('saved-records-table');
+    // 保存された記録を読み込み
+    const savedRecords = JSON.parse(localStorage.getItem('savedRecords')) || [];
 
-        // テーブルに記録を表示
-        savedRecords.forEach(record => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${record.name}</td>
-                <td>${record.event}</td>
-                <td>${record.distance}</td>
-                <td>${record.records.join(', ')}</td>
-                <td>${record.count}</td>
-                <td>${record.date}</td>
-            `;
-            tableBody.appendChild(row);
+    const tbody = document.getElementById('saved-records-table-body');
+
+    // 記録をテーブルに表示
+    savedRecords.forEach(record => {
+        const tr = document.createElement('tr');
+        tr.innerHTML += `<td>${record.name}</td>`;
+        tr.innerHTML += `<td>${record.event}</td>`;
+        tr.innerHTML += `<td>${record.distance}</td>`;
+
+        let recordValues = '';
+        record.records.forEach(r => {
+            recordValues += `${r} `;
         });
-    }
+        tr.innerHTML += `<td>${recordValues.trim()}</td>`;
+        tr.innerHTML += `<td>${record.count}</td>`;
+        tr.innerHTML += `<td>${record.date}</td>`;
+        
+        tbody.appendChild(tr);
+    });
 
-    // ページ読み込み時に記録を表示
-    window.onload = loadSavedRecords;
+    // ホームに戻るボタンの処理
+    document.getElementById('back-to-home').addEventListener('click', function () {
+        window.location.href = 'index.html'; // ホームページのファイル名に変更
+    });
 </script>
 
 </body>
