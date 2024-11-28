@@ -25,6 +25,23 @@
             padding: 5px 10px;
             cursor: pointer;
         }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 10px;
+            margin-bottom: 20px;
+        }
+        .calendar .date-link {
+            text-align: center;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            padding: 10px;
+        }
+        .calendar .selected {
+            background-color: #4CAF50;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -80,7 +97,6 @@
             <th>本数</th>
             <th>日付</th>
             <th>削除</th>
-            <th>保存</th>
         </tr>
     </thead>
     <tbody id="record-table-body">
@@ -88,13 +104,22 @@
     </tbody>
 </table>
 
+<h2>カレンダー</h2>
+<div id="calendar" class="calendar"></div>
+
 <!-- 保存先ページへのリンク -->
 <br>
 <button id="view-saved-records">保存された記録を確認</button>
 
+<!-- グラフ表示 -->
+<h2>選手の成績グラフ</h2>
+<canvas id="performance-chart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
     // 初期の選手データ
-    const records = JSON.parse(localStorage.getItem('savedRecords')) || [];
+    let records = JSON.parse(localStorage.getItem('savedRecords')) || [];
 
     // 選手追加ボタンの処理
     document.getElementById('add-selected-athletes').addEventListener('click', function() {
@@ -131,6 +156,8 @@
 
         localStorage.setItem('savedRecords', JSON.stringify(records)); // ローカルストレージに保存
         renderTable(); // 記録を反映
+        generateCalendar(); // カレンダー更新
+        renderChart(); // グラフを更新
     });
 
     // 記録を反映してテーブルを表示
@@ -152,7 +179,6 @@
             tr.innerHTML += `<td>${record.count}</td>`;
             tr.innerHTML += `<td>${record.date}</td>`;
             tr.innerHTML += `<td><button onclick="deleteRecord(${index})">削除</button></td>`;
-            tr.innerHTML += `<td><button onclick="saveRecords()">保存</button></td>`;
 
             tbody.appendChild(tr);
         });
@@ -166,22 +192,108 @@
     // 記録の削除
     function deleteRecord(index) {
         records.splice(index, 1);
-        saveRecords();
-        renderTable();
-    }
-
-    // 記録の保存
-    function saveRecords() {
         localStorage.setItem('savedRecords', JSON.stringify(records));
+        renderTable();
+        generateCalendar();
+        renderChart();
     }
 
-    // 保存された記録ページに移動
-    document.getElementById('view-saved-records').addEventListener('click', function() {
-        window.location.href = 'savedRecords.html';
-    });
+    // カレンダー生成
+    function generateCalendar() {
+        const calendarDiv = document.getElementById('calendar');
+        calendarDiv.innerHTML = ''; // 既存のカレンダーをリセット
 
-    // 初期テーブル表示
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth(); // 0-11
+        const currentYear = currentDate.getFullYear();
+
+        // 月の最初の日を取得
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+
+        const daysOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
+        daysOfWeek.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.textContent = day;
+            calendarDiv.appendChild(dayHeader);
+        });
+
+        const startDay = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+
+        for (let i = 0; i < startDay; i++) {
+            const emptyCell = document.createElement('div');
+            calendarDiv.appendChild(emptyCell);
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+            const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            const dateCell = document.createElement('div');
+            dateCell.classList.add('date-link');
+            dateCell.textContent = day;
+            dateCell.onclick = () => showRecordsForDate(dateStr);
+            calendarDiv.appendChild(dateCell);
+        }
+    }
+
+    // 特定の日付の記録を表示
+    function showRecordsForDate(date) {
+        const filteredRecords = records.filter(record => record.date === date);
+        alert(filteredRecords.map(record => `${record.name} - ${record.event}: ${record.records.join(', ')}`).join('\n'));
+    }
+
+    // グラフ作成
+    function renderChart() {
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        const playerData = {};
+
+        records.forEach(record => {
+            if (!playerData[record.name]) {
+                playerData[record.name] = [];
+            }
+            playerData[record.name].push({
+                event: record.event,
+                records: record.records
+            });
+        });
+
+        const chartData = {
+            labels: Object.keys(playerData),
+            datasets: Object.keys(playerData).map(playerName => {
+                return {
+                    label: playerName,
+                    data: playerData[playerName].map(record => record.records.length),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 1
+                };
+            })
+        };
+
+        new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // 初期化
+    generateCalendar();
     renderTable();
+    renderChart();
+
 </script>
 
 </body>

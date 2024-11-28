@@ -126,6 +126,7 @@
             const dateCell = document.createElement('div');
             dateCell.textContent = day;
             dateCell.classList.add('date-link');
+            dateCell.setAttribute('data-date', dateStr);  // 日付をdata属性として追加
 
             // その日の記録があればクリック可能にする
             if (groupedByDate[dateStr]) {
