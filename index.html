@@ -25,51 +25,45 @@
             padding: 5px 10px;
             cursor: pointer;
         }
+        .form-section {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
 <h1>選手記録管理</h1>
 
-<!-- 選手選択 -->
-<label for="athlete-select">選手を選択:</label>
-<select id="athlete-select" multiple>
-    <option value="1">木村美海</option>
-    <option value="2">相方紫帆</option>
-    <option value="3">岩見琉音</option>
-    <option value="4">前田莉佐</option>
-    <option value="5">湯本真未</option>
-    <option value="6">崎本七海</option>
-    <option value="7">佐藤安里紗</option>
-    <option value="8">永瀬裕大</option>
-    <option value="9">和田卓英</option>
-    <option value="10">北川大喜</option>
-    <option value="11">木下裕翔</option>
-    <option value="12">中村香葉</option>
-</select>
+<div class="form-section">
+    <h2>新規選手登録</h2>
+    <label for="new-athlete-name">選手名:</label>
+    <input type="text" id="new-athlete-name" placeholder="新規選手名を入力">
+    <button id="register-new-athlete">新規登録</button>
+</div>
 
-<br><br>
+<div class="form-section">
+    <h2>選手記録追加</h2>
+    <label for="athlete-select">選手を選択:</label>
+    <select id="athlete-select" multiple>
+        <!-- 選手のリストはJavaScriptで動的に生成 -->
+    </select>
+    <br><br>
 
-<!-- 種目と距離 -->
-<label for="event-input">種目:</label>
-<input type="text" id="event-input" placeholder="種目を入力">
+    <label for="event-input">種目:</label>
+    <input type="text" id="event-input" placeholder="種目を入力">
 
-<label for="distance-input">距離:</label>
-<input type="text" id="distance-input" placeholder="距離を入力">
+    <label for="distance-input">距離:</label>
+    <input type="text" id="distance-input" placeholder="距離を入力">
 
-<!-- 記録の本数 -->
-<br><br>
-<label for="record-count">記録の本数:</label>
-<input type="number" id="record-count" value="1" min="1" max="10">
+    <br><br>
+    <label for="record-count">記録の本数:</label>
+    <input type="number" id="record-count" value="1" min="1" max="10">
 
-<br><br>
-
-<!-- 選手追加ボタン -->
-<button id="add-selected-athletes">選手追加</button>
+    <br><br>
+    <button id="add-selected-athletes">選手追加</button>
+</div>
 
 <h2>記録一覧</h2>
-
-<!-- 記録のテーブル -->
 <table>
     <thead>
         <tr>
@@ -88,27 +82,44 @@
     </tbody>
 </table>
 
-<!-- 保存先ページへのリンク -->
-<button id="view-saved-records">保存された記録を確認</button>
-
 <script>
     // 初期の選手データ
-    const records = [
+    let records = [
         { id: 1, name: '木村美海', event: '', distance: '', count: 0, records: [], date: '' },
         { id: 2, name: '相方紫帆', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 3, name: '岩見琉音', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 4, name: '前田莉佐', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 5, name: '湯本真未', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 6, name: '崎本七海', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 7, name: '佐藤安里紗', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 8, name: '永瀬裕大', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 9, name: '和田卓英', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 10, name: '北川大喜', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 11, name: '木下裕翔', event: '', distance: '', count: 0, records: [], date: '' },
-        { id: 12, name: '中村香葉', event: '', distance: '', count: 0, records: [], date: '' },
+        // 他の初期選手データをここに追加
     ];
 
-    // 選手追加ボタンの処理
+    // 選手リストを動的に生成
+    function updateAthleteSelect() {
+        const athleteSelect = document.getElementById('athlete-select');
+        athleteSelect.innerHTML = '';
+        records.forEach(record => {
+            const option = document.createElement('option');
+            option.value = record.id;
+            option.textContent = record.name;
+            athleteSelect.appendChild(option);
+        });
+    }
+
+    // 新規選手登録
+    document.getElementById('register-new-athlete').addEventListener('click', function() {
+        const newName = document.getElementById('new-athlete-name').value.trim();
+        if (!newName) {
+            alert('選手名を入力してください。');
+            return;
+        }
+
+        const newId = records.length + 1;
+        records.push({ id: newId, name: newName, event: '', distance: '', count: 0, records: [], date: '' });
+        localStorage.setItem('records', JSON.stringify(records)); // 新しい選手も保存
+
+        updateAthleteSelect(); // 選手リストを更新
+        document.getElementById('new-athlete-name').value = ''; // 入力欄をクリア
+        alert(`${newName} を登録しました！`);
+    });
+
+    // 記録追加
     document.getElementById('add-selected-athletes').addEventListener('click', function() {
         const selectedAthleteIds = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => parseInt(option.value));
         const event = document.getElementById('event-input').value;
@@ -125,74 +136,78 @@
             return;
         }
 
-        const date = new Date().toLocaleDateString(); // 現在の日付を取得
+        const date = new Date().toLocaleDateString();
 
-        // 選手の情報を追加
         selectedAthleteIds.forEach(id => {
-            const athlete = records[id - 1]; // records 配列から選手データを取得
+            const athlete = records.find(record => record.id === id);
             athlete.event = event;
             athlete.distance = distance;
             athlete.count = recordCount;
-            athlete.date = date; // 同じ日に記録
-            athlete.records.push(...new Array(recordCount).fill('')); // 記録を空の状態で追加
+            athlete.date = date;
+            athlete.records = new Array(recordCount).fill('');
         });
 
-        renderTable(); // 記録を反映
+        renderTable(); // テーブルを再描画
     });
 
-    // 記録を反映してテーブルを表示
+    // テーブルを描画
     function renderTable() {
         const tbody = document.getElementById('record-table-body');
-        tbody.innerHTML = ''; // テーブルの中身をリセット
-
-        records.forEach((record, index) => {
-            if (record.event === '' || record.distance === '') return; // 種目と距離が未設定の選手は表示しない
+        tbody.innerHTML = '';
+        records.forEach(record => {
+            if (!record.event || !record.distance) return;
 
             const tr = document.createElement('tr');
-            tr.innerHTML += `<td>${record.name}</td>`;
-            tr.innerHTML += `<td>${record.event}</td>`;
-            tr.innerHTML += `<td>${record.distance}</td>`;
-
-            // 記録の入力フィールドを動的に追加
-            let recordInputs = '';
-            for (let i = 0; i < record.count; i++) {
-                recordInputs += `<input type="text" value="${record.records[i]}" onchange="updateRecordField(${index}, 'records', this.value, ${i})"> `;
-            }
-            tr.innerHTML += `<td>${recordInputs}</td>`;
-
-            tr.innerHTML += `<td>${record.count}</td>`; // 本数
-            tr.innerHTML += `<td>${record.date}</td>`;  // 日付
-
-            tr.innerHTML += `<td><button onclick="deleteRecord(${index})">削除</button></td>`; // 削除ボタン
-            tr.innerHTML += `<td><button onclick="saveRecord(${index})">保存</button></td>`; // 保存ボタン
-
+            tr.innerHTML = `
+                <td>${record.name}</td>
+                <td>${record.event}</td>
+                <td>${record.distance}</td>
+                <td>${record.records.map((r, i) => `<input type="text" value="${r}" onchange="updateRecord(${record.id}, ${i}, 
+this.value)">`).join(' ')}</td>
+                <td>${record.count}</td>
+                <td>${record.date}</td>
+                <td><button onclick="deleteRecord(${record.id})">削除</button></td>
+                <td><button onclick="saveRecord(${record.id})">保存</button></td>
+            `;
             tbody.appendChild(tr);
         });
     }
 
-    // 記録フィールドの更新処理
-    function updateRecordField(athleteIndex, field, value, recordIndex) {
-        records[athleteIndex][field][recordIndex] = value;
+    // 記録の更新
+    function updateRecord(id, index, value) {
+        const athlete = records.find(record => record.id === id);
+        athlete.records[index] = value;
     }
 
-    // 記録の削除処理
-    function deleteRecord(index) {
-        records[index].event = '';
-        records[index].distance = '';
-        records[index].count = 0;
-        records[index].records = [];
+    // 記録の削除
+    function deleteRecord(id) {
+        const athlete = records.find(record => record.id === id);
+        athlete.event = '';
+        athlete.distance = '';
+        athlete.count = 0;
+        athlete.records = [];
         renderTable();
     }
 
-    // 記録を保存する処理
-    function saveRecord(index) {
-        localStorage.setItem('savedRecords', JSON.stringify(records));
+    // 記録の保存
+    function saveRecord(id) {
+        const athlete = records.find(record => record.id === id);
+        localStorage.setItem(`athlete_${id}`, JSON.stringify(athlete));
+        alert(`${athlete.name} のデータを保存しました！`);
     }
 
-    // 保存された記録ページに移動する処理
-    document.getElementById('view-saved-records').addEventListener('click', function() {
-        window.location.href = 'savedRecords.html';
-    });
+    // ページロード時に保存されたデータを読み込む
+    function loadSavedRecords() {
+        const savedRecords = localStorage.getItem('records');
+        if (savedRecords) {
+            records = JSON.parse(savedRecords);
+        }
+        renderTable();
+        updateAthleteSelect();
+    }
+
+    // ページロード時にデータを読み込む
+    window.onload = loadSavedRecords;
 </script>
 
 </body>
