@@ -9,6 +9,28 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .date-link {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+        }
+        .date-link:hover {
+            background-color: #ddd;
+        }
+        .selected-date {
+            background-color: #4CAF50;
+            color: white;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -21,13 +43,25 @@
             padding: 8px;
             text-align: center;
         }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 10px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
 <h1>保存された記録</h1>
 
-<table>
+<!-- カレンダー表示 -->
+<div id="calendar" class="calendar">
+    <!-- カレンダーの日付はここに追加される -->
+</div>
+
+<h2>記録</h2>
+<table id="record-table">
     <thead>
         <tr>
             <th>選手名</th>
@@ -35,46 +69,100 @@
             <th>距離</th>
             <th>記録</th>
             <th>本数</th>
-            <th>日付</th>
         </tr>
     </thead>
-    <tbody id="saved-records-table-body">
-        <!-- 保存された記録の行がここに追加される -->
+    <tbody id="record-table-body">
+        <!-- 記録の行はここに追加される -->
     </tbody>
 </table>
 
-<!-- ホームへ戻るボタン -->
-<br>
-<button id="back-to-home">ホームに戻る</button>
-
 <script>
-    // 保存された記録を読み込み
-    const savedRecords = JSON.parse(localStorage.getItem('savedRecords')) || [];
+    // ローカルストレージから記録を取得
+    const records = JSON.parse(localStorage.getItem('savedRecords')) || [];
 
-    const tbody = document.getElementById('saved-records-table-body');
+    // 日付ごとに記録を整理
+    const groupedByDate = records.reduce((acc, record) => {
+        const date = record.date; // 日付（例: "2024-11-28"）
+        if (!acc[date]) {
+            acc[date] = [];
+        }
+        acc[date].push(record);
+        return acc;
+    }, {});
 
-    // 記録をテーブルに表示
-    savedRecords.forEach(record => {
-        const tr = document.createElement('tr');
-        tr.innerHTML += `<td>${record.name}</td>`;
-        tr.innerHTML += `<td>${record.event}</td>`;
-        tr.innerHTML += `<td>${record.distance}</td>`;
+    // 現在の月を取得
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth(); // 0-11
+    const currentYear = currentDate.getFullYear();
 
-        let recordValues = '';
-        record.records.forEach(r => {
-            recordValues += `${r} `;
+    // 月の最初の日を取得
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+
+    // カレンダーの日付を作成
+    function generateCalendar() {
+        const calendarDiv = document.getElementById('calendar');
+        calendarDiv.innerHTML = ''; // 既存のカレンダーをリセット
+
+        // 曜日ヘッダー
+        const daysOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
+        daysOfWeek.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.textContent = day;
+            calendarDiv.appendChild(dayHeader);
         });
-        tr.innerHTML += `<td>${recordValues.trim()}</td>`;
-        tr.innerHTML += `<td>${record.count}</td>`;
-        tr.innerHTML += `<td>${record.date}</td>`;
-        
-        tbody.appendChild(tr);
-    });
 
-    // ホームに戻るボタンの処理
-    document.getElementById('back-to-home').addEventListener('click', function () {
-        window.location.href = 'index.html'; // ホームページのファイル名に変更
-    });
+        // 月初の日から日数を計算してカレンダーを作成
+        const startDay = firstDay.getDay(); // 月初が何曜日か
+        const totalDays = lastDay.getDate(); // 月の最終日
+
+        for (let i = 0; i < startDay; i++) {
+            const emptyCell = document.createElement('div');
+            calendarDiv.appendChild(emptyCell);
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+            const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            const dateCell = document.createElement('div');
+            dateCell.textContent = day;
+            dateCell.classList.add('date-link');
+
+            // その日の記録があればクリック可能にする
+            if (groupedByDate[dateStr]) {
+                dateCell.classList.add('has-records');
+                dateCell.addEventListener('click', () => displayRecordsForDate(dateStr));
+            }
+
+            calendarDiv.appendChild(dateCell);
+        }
+    }
+
+    // 日付をクリックした時にその日の記録を表示
+    function displayRecordsForDate(date) {
+        // 日付を選択した状態にする
+        const allDateLinks = document.querySelectorAll('.date-link');
+        allDateLinks.forEach(link => link.classList.remove('selected-date'));
+        document.querySelector(`.date-link[data-date="${date}"]`).classList.add('selected-date');
+
+        const recordsForDate = groupedByDate[date];
+        const tbody = document.getElementById('record-table-body');
+        tbody.innerHTML = ''; // テーブルをリセット
+
+        recordsForDate.forEach(record => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${record.name}</td>
+                <td>${record.event}</td>
+                <td>${record.distance}</td>
+                <td>${record.records.join(', ')}</td>
+                <td>${record.count}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // カレンダー生成
+    generateCalendar();
 </script>
 
 </body>
