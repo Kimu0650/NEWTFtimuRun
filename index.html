@@ -42,174 +42,115 @@
             background-color: #4CAF50;
             color: white;
         }
+        .hidden {
+            display: none;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
 
 <h1>選手記録管理</h1>
 
-<!-- 選手選択 -->
-<label for="athlete-select">選手を選択:</label>
-<select id="athlete-select" multiple>
-    <option value="1">木村美海</option>
-    <option value="2">相方紫帆</option>
-    <option value="3">岩見琉音</option>
-    <option value="4">前田莉佐</option>
-    <option value="5">湯本真未</option>
-    <option value="6">崎本七海</option>
-    <option value="7">佐藤安里紗</option>
-    <option value="8">永瀬裕大</option>
-    <option value="9">和田卓英</option>
-    <option value="10">北川大喜</option>
-    <option value="11">木下裕翔</option>
-    <option value="12">中村香葉</option>
-</select>
+<!-- メイン画面: カレンダーのみ表示 -->
+<div id="calendar-container">
+    <h2>カレンダー</h2>
+    <div id="calendar-header" class="calendar-header">
+        <button id="prev-month">＜</button>
+        <span id="current-month-year"></span>
+        <button id="next-month">＞</button>
+    </div>
+    <div id="calendar" class="calendar"></div>
+</div>
 
-<br><br>
+<!-- 記録管理画面: 変更後に表示 -->
+<div id="record-management" class="hidden">
+    <!-- 選手選択 -->
+    <label for="athlete-select">選手を選択:</label>
+    <select id="athlete-select" multiple>
+        <option value="1">木村美海</option>
+        <option value="2">相方紫帆</option>
+        <option value="3">岩見琉音</option>
+        <option value="4">前田莉佐</option>
+        <option value="5">湯本真未</option>
+        <option value="6">崎本七海</option>
+        <option value="7">佐藤安里紗</option>
+        <option value="8">永瀬裕大</option>
+        <option value="9">和田卓英</option>
+        <option value="10">北川大喜</option>
+        <option value="11">木下裕翔</option>
+        <option value="12">中村香葉</option>
+    </select>
 
-<!-- 種目と距離 -->
-<label for="event-input">種目:</label>
-<input type="text" id="event-input" placeholder="種目を入力">
+    <br><br>
 
-<label for="distance-input">距離:</label>
-<input type="text" id="distance-input" placeholder="距離を入力">
+    <!-- 種目と距離 -->
+    <label for="event-input">種目:</label>
+    <input type="text" id="event-input" placeholder="種目を入力">
 
-<!-- 記録の本数 -->
-<br><br>
-<label for="record-count">記録の本数:</label>
-<input type="number" id="record-count" value="1" min="1" max="10">
+    <label for="distance-input">距離:</label>
+    <input type="text" id="distance-input" placeholder="距離を入力">
 
-<br><br>
+    <!-- 記録の本数 -->
+    <br><br>
+    <label for="record-count">記録の本数:</label>
+    <input type="number" id="record-count" value="1" min="1" max="10">
 
-<!-- 選手追加ボタン -->
-<button id="add-selected-athletes">選手追加</button>
+    <br><br>
 
-<h2>記録一覧</h2>
+    <!-- 選手追加ボタン -->
+    <button id="add-selected-athletes">選手追加</button>
 
-<!-- 記録のテーブル -->
-<table>
-    <thead>
-        <tr>
-            <th>選手名</th>
-            <th>種目</th>
-            <th>距離</th>
-            <th>記録</th>
-            <th>本数</th>
-            <th>日付</th>
-            <th>削除</th>
-        </tr>
-    </thead>
-    <tbody id="record-table-body">
-        <!-- 記録の行はここに追加される -->
-    </tbody>
-</table>
+    <h2>記録一覧</h2>
 
-<h2>カレンダー</h2>
-<div id="calendar" class="calendar"></div>
+    <!-- 記録のテーブル -->
+    <table>
+        <thead>
+            <tr>
+                <th>選手名</th>
+                <th>種目</th>
+                <th>距離</th>
+                <th>記録</th>
+                <th>本数</th>
+                <th>日付</th>
+                <th>削除</th>
+            </tr>
+        </thead>
+        <tbody id="record-table-body">
+            <!-- 記録の行はここに追加される -->
+        </tbody>
+    </table>
 
-<!-- 保存先ページへのリンク -->
-<br>
-<button id="view-saved-records">保存された記録を確認</button>
+    <h2>選手の成績グラフ</h2>
+    <canvas id="performance-chart" width="400" height="200"></canvas>
 
-<!-- グラフ表示 -->
-<h2>選手の成績グラフ</h2>
-<canvas id="performance-chart" width="400" height="200"></canvas>
+    <br>
+    <button id="view-saved-records">保存された記録を確認</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // 初期の選手データ
     let records = JSON.parse(localStorage.getItem('savedRecords')) || [];
-
-    // 選手追加ボタンの処理
-    document.getElementById('add-selected-athletes').addEventListener('click', function() {
-        const selectedAthleteIds = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => parseInt(option.value));
-        const event = document.getElementById('event-input').value;
-        const distance = document.getElementById('distance-input').value;
-        const recordCount = parseInt(document.getElementById('record-count').value);
-
-        if (selectedAthleteIds.length === 0) {
-            alert('選手を選択してください。');
-            return;
-        }
-
-        if (!event || !distance) {
-            alert('種目と距離を入力してください。');
-            return;
-        }
-
-        const date = new Date().toLocaleDateString(); // 現在の日付を取得
-
-        // 選手の情報を追加
-        selectedAthleteIds.forEach(id => {
-            const name = document.querySelector(`#athlete-select option[value="${id}"]`).textContent;
-            records.push({
-                id,
-                name,
-                event,
-                distance,
-                count: recordCount,
-                records: new Array(recordCount).fill(''),
-                date,
-            });
-        });
-
-        localStorage.setItem('savedRecords', JSON.stringify(records)); // ローカルストレージに保存
-        renderTable(); // 記録を反映
-        generateCalendar(); // カレンダー更新
-        renderChart(); // グラフを更新
-    });
-
-    // 記録を反映してテーブルを表示
-    function renderTable() {
-        const tbody = document.getElementById('record-table-body');
-        tbody.innerHTML = ''; // テーブルの中身をリセット
-
-        records.forEach((record, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML += `<td>${record.name}</td>`;
-            tr.innerHTML += `<td>${record.event}</td>`;
-            tr.innerHTML += `<td>${record.distance}</td>`;
-
-            let recordInputs = '';
-            record.records.forEach((value, i) => {
-                recordInputs += `<input type="text" value="${value}" onchange="updateRecord(${index}, ${i}, this.value)"> `;
-            });
-            tr.innerHTML += `<td>${recordInputs}</td>`;
-            tr.innerHTML += `<td>${record.count}</td>`;
-            tr.innerHTML += `<td>${record.date}</td>`;
-            tr.innerHTML += `<td><button onclick="deleteRecord(${index})">削除</button></td>`;
-
-            tbody.appendChild(tr);
-        });
-    }
-
-    // 記録の更新
-    function updateRecord(index, recordIndex, value) {
-        records[index].records[recordIndex] = value;
-    }
-
-    // 記録の削除
-    function deleteRecord(index) {
-        records.splice(index, 1);
-        localStorage.setItem('savedRecords', JSON.stringify(records));
-        renderTable();
-        generateCalendar();
-        renderChart();
-    }
+    let selectedDate = null;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
 
     // カレンダー生成
     function generateCalendar() {
         const calendarDiv = document.getElementById('calendar');
+        const currentMonthYear = document.getElementById('current-month-year');
         calendarDiv.innerHTML = ''; // 既存のカレンダーをリセット
 
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth(); // 0-11
-        const currentYear = currentDate.getFullYear();
-
-        // 月の最初の日を取得
         const firstDay = new Date(currentYear, currentMonth, 1);
         const lastDay = new Date(currentYear, currentMonth + 1, 0);
+
+        currentMonthYear.textContent = `${currentYear}年 ${currentMonth + 1}月`;
 
         const daysOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
         daysOfWeek.forEach(day => {
@@ -231,69 +172,117 @@
             const dateCell = document.createElement('div');
             dateCell.classList.add('date-link');
             dateCell.textContent = day;
-            dateCell.onclick = () => showRecordsForDate(dateStr);
+            dateCell.onclick = () => {
+                selectedDate = dateStr;
+                showRecordManagementPage();
+            };
             calendarDiv.appendChild(dateCell);
         }
     }
 
-    // 特定の日付の記録を表示
-    function showRecordsForDate(date) {
-        const filteredRecords = records.filter(record => record.date === date);
-        alert(filteredRecords.map(record => `${record.name} - ${record.event}: ${record.records.join(', ')}`).join('\n'));
+    // カレンダーと記録管理画面の切り替え
+    function showRecordManagementPage() {
+        document.getElementById('calendar-container').classList.add('hidden');
+        document.getElementById('record-management').classList.remove('hidden');
     }
 
-    // グラフ作成
-    function renderChart() {
-        const ctx = document.getElementById('performance-chart').getContext('2d');
-        const playerData = {};
+    // 記録を反映してテーブルを表示
+    function renderTable() {
+        const tbody = document.getElementById('record-table-body');
+        tbody.innerHTML = ''; // テーブルの中身をリセット
 
-        records.forEach(record => {
-            if (!playerData[record.name]) {
-                playerData[record.name] = [];
-            }
-            playerData[record.name].push({
-                event: record.event,
-                records: record.records
+        const filteredRecords = records.filter(record => record.date === selectedDate);
+
+        filteredRecords.forEach((record, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML += `<td>${record.name}</td>`;
+            tr.innerHTML += `<td>${record.event}</td>`;
+            tr.innerHTML += `<td>${record.distance}</td>`;
+
+            let recordInputs = '';
+            record.records.forEach((value, i) => {
+                recordInputs += `<input type="text" value="${value}" onchange="updateRecord(${index}, ${i}, this.value)"> `;
             });
-        });
+            tr.innerHTML += `<td>${recordInputs}</td>`;
+            tr.innerHTML += `<td>${record.count}</td>`;
+            tr.innerHTML += `<td>${record.date}</td>`;
+            tr.innerHTML += `<td><button onclick="deleteRecord(${index})">削除</button></td>`;
 
-        const chartData = {
-            labels: Object.keys(playerData),
-            datasets: Object.keys(playerData).map(playerName => {
-                return {
-                    label: playerName,
-                    data: playerData[playerName].map(record => record.records.length),
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderWidth: 1
-                };
-            })
-        };
-
-        new Chart(ctx, {
-            type: 'line',
-            data: chartData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
+            tbody.appendChild(tr);
         });
     }
 
-    // 初期化
-    generateCalendar();
-    renderTable();
-    renderChart();
+    // 記録の更新
+    function updateRecord(index, recordIndex, value) {
+        records[index].records[recordIndex] = value;
+        localStorage.setItem('savedRecords', JSON.stringify(records));
+    }
 
+    // 記録の削除
+    function deleteRecord(index) {
+        records.splice(index, 1);
+        localStorage.setItem('savedRecords', JSON.stringify(records));
+        renderTable();
+    }
+
+    // 選手追加ボタンの処理
+    document.getElementById('add-selected-athletes').addEventListener('click', function() {
+        const selectedAthleteIds = Array.from(document.getElementById('athlete-select').selectedOptions).map(option => parseInt(option.value));
+        const event = document.getElementById('event-input').value;
+        const distance = document.getElementById('distance-input').value;
+        const recordCount = parseInt(document.getElementById('record-count').value);
+
+        if (selectedAthleteIds.length === 0) {
+            alert('選手を選択してください。');
+            return;
+        }
+
+        selectedAthleteIds.forEach(athleteId => {
+            const athleteNames = [
+                '木村美海', '相方紫帆', '岩見琉音', '前田莉佐', '湯本真未', '崎本七海',
+                '佐藤安里紗', '永瀬裕大', '和田卓英', '北川大喜', '木下裕翔', '中村香葉'
+            ];
+
+            const athleteName = athleteNames[athleteId - 1];
+            const newRecord = {
+                name: athleteName,
+                event: event,
+                distance: distance,
+                records: Array(recordCount).fill(''),
+                count: recordCount,
+                date: selectedDate
+            };
+
+            records.push(newRecord);
+        });
+
+        localStorage.setItem('savedRecords', JSON.stringify(records));
+        renderTable();
+    });
+
+    // 前月と次月ボタンの処理
+    document.getElementById('prev-month').addEventListener('click', function() {
+        if (currentMonth === 0) {
+            currentMonth = 11;
+            currentYear--;
+        } else {
+            currentMonth--;
+        }
+        generateCalendar();
+    });
+
+    document.getElementById('next-month').addEventListener('click', function() {
+        if (currentMonth === 11) {
+            currentMonth = 0;
+            currentYear++;
+        } else {
+            currentMonth++;
+        }
+        generateCalendar();
+    });
+
+    // 最初にカレンダーを表示
+    generateCalendar();
 </script>
 
 </body>

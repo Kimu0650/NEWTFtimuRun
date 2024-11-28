@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>記録管理</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .date-link {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+        }
+        .date-link:hover {
+            background-color: #ddd;
+        }
+        .selected-date {
+            background-color: #4CAF50;
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>保存された記録</h1>
+
+<!-- カレンダー表示 -->
+<div id="calendar" class="calendar"></div>
+
+<!-- 記録入力フォーム -->
+<div id="record-form" style="display: none;">
+    <h2>記録を入力</h2>
+    <form id="inputForm">
+        <label for="name">選手名:</label><br>
+        <input type="text" id="name" name="name"><br><br>
+        <label for="event">種目:</label><br>
+        <input type="text" id="event" name="event"><br><br>
+        <label for="distance">距離:</label><br>
+        <input type="text" id="distance" name="distance"><br><br>
+        <label for="time">タイム:</label><br>
+        <input type="text" id="time" name="time"><br><br>
+        <button type="button" id="saveRecordButton">記録保存</button>
+    </form>
+</div>
+
+<!-- 記録表示エリア -->
+<div id="records-container"></div>
+
+<!-- グラフ表示 -->
+<canvas id="timeChart" width="400" height="200" style="display: none;"></canvas>
+
+<script>
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth(); // 0-11
+    const currentYear = currentDate.getFullYear();
+    const records = JSON.parse(localStorage.getItem('savedRecords')) || {};
+
+    // 月初と月末を取得
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+
+    function generateCalendar() {
+        const calendarDiv = document.getElementById('calendar');
+        calendarDiv.innerHTML = ''; // 既存のカレンダーをリセット
+
+        // 曜日ヘッダー
+        const daysOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
+        daysOfWeek.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.textContent = day;
+            calendarDiv.appendChild(dayHeader);
+        });
+
+        const startDay = firstDay.getDay(); // 月初が何曜日か
+        const totalDays = lastDay.getDate(); // 月の最終日
+
+        for (let i = 0; i < startDay; i++) {
+            const emptyCell = document.createElement('div');
+            calendarDiv.appendChild(emptyCell);
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+            const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            const dateCell = document.createElement('div');
+            dateCell.textContent = day;
+            dateCell.classList.add('date-link');
+            dateCell.setAttribute('data-date', dateStr);
+
+            // その日の記録があればクリック可能にする
+            if (records[dateStr]) {
+                dateCell.classList.add('has-records');
+                dateCell.addEventListener('click', () => displayRecordsForDate(dateStr));
+            } else {
+                dateCell.addEventListener('click', () => showRecordForm(dateStr));
+            }
+
+            calendarDiv.appendChild(dateCell);
+        }
+    }
+
+    function showRecordForm(date) {
+        document.getElementById('record-form').style.display = 'block';
+        document.getElementById('saveRecordButton').onclick = () => saveRecord(date);
+    }
+
+    function saveRecord(date) {
+        const name = document.getElementById('name').value;
+        const event = document.getElementById('event').value;
+        const distance = document.getElementById('distance').value;
+        const time = document.getElementById('time').value;
+
+        if (!records[date]) {
+            records[date] = [];
+        }
+
+        records[date].push({ name, event, distance, time });
+        localStorage.setItem('savedRecords', JSON.stringify(records));
+        alert('記録が保存されました！');
+        generateCalendar(); // カレンダーを更新
+        document.getElementById('record-form').style.display = 'none';
+    }
+
+    function displayRecordsForDate(date) {
+        const recordsForDate = records[date];
+        const recordsContainer = document.getElementById('records-container');
+        recordsContainer.innerHTML = ''; // 既存の記録をクリア
+
+        // クリックした日付の記録を表示
+        recordsForDate.forEach((record, index) => {
+            const recordDiv = document.createElement('div');
+            recordDiv.classList.add('record');
+            recordDiv.innerHTML = `
+                <p><strong>選手名:</strong> ${record.name}</p>
+                <p><strong>種目:</strong> ${record.event}</p>
+                <p><strong>距離:</strong> ${record.distance}</p>
+                <p><strong>タイム:</strong> ${record.time}</p>
+                <button onclick="deleteRecord('${date}', ${index})">削除</button>
+            `;
+            recordsContainer.appendChild(recordDiv);
+        });
+
+        // グラフ描画部分に追加
+        displayGraph(recordsForDate);
+    }
+
+    function deleteRecord(date, index) {
+        // 対象の日付の記録から指定されたインデックスの記録を削除
+        records[date].splice(index, 1);
+
+        // もしその日に記録がなくなった場合、カレンダーを更新
+        if (records[date].length === 0) {
+            delete records[date];
+        }
+
+        // 更新された記録をlocalStorageに保存
+        localStorage.setItem('savedRecords', JSON.stringify(records));
+
+        // カレンダーを再生成して削除された記録を反映
+        generateCalendar();
+    }
+
+    function displayGraph(recordsForDate) {
+        const ctx = document.getElementById('timeChart').getContext('2d');
+        const times = recordsForDate.map(record => record.time);
+        const labels = recordsForDate.map(record => record.name);
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'タイム',
+                    data: times,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false
+                }]
+            }
+        });
+
+        document.getElementById('timeChart').style.display = 'block';
+    }
+
+    // カレンダー生成
+    generateCalendar();
+</script>
+
+</body>
+</html>
+
